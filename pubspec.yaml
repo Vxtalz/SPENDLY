@@ -1,0 +1,29 @@
+name: spendly
+description: Spendly - a 30-day financial habits simulator for Filipino youth.
+publish_to: "none"
+
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+
+  supabase_flutter: ^2.5.0
+  flutter_riverpod: ^2.5.1
+  radix_icons: ^1.0.1
+  intl: ^0.19.0
+  shared_preferences: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
