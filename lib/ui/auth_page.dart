@@ -63,7 +63,7 @@ class _AuthPageState extends State<AuthPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.06),
+                  color: const Color(0xFFFFE5E5),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

@@ -37,7 +37,7 @@ class OnboardingPage extends StatelessWidget {
               const SizedBox(height: 32),
               Expanded(
                 child: PageView(
-                  children: [
+                  children: const [
                     _OnboardingSlide(
                       icon: RadixIcons.Lightning_Bolt,
                       title: 'Practice money moves daily',
@@ -104,7 +104,7 @@ class _OnboardingSlide extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withOpacity(0.08),
+              color: theme.colorScheme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Icon(

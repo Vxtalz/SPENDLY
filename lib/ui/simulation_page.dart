@@ -225,8 +225,6 @@ class _SimulationPageState extends State<SimulationPage> {
 
   Future<void> _showWeeklyReport() async {
     final summary = await _computeWeeklySummary();
-    if (!mounted) return;
-
     final spent = summary['spent'] as double;
     final saved = summary['saved'] as double;
     String message;
@@ -253,6 +251,10 @@ class _SimulationPageState extends State<SimulationPage> {
       await _awardBadge(badgeKey, badgeLabel);
     }
 
+    if (!mounted) return;
+
+    final navigator = Navigator.of(context);
+
     await showDialog(
       context: context,
       builder: (_) {
@@ -274,7 +276,7 @@ class _SimulationPageState extends State<SimulationPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => navigator.pop(),
               child: const Text('Okay'),
             ),
           ],
@@ -404,7 +406,7 @@ class _SimulationPageState extends State<SimulationPage> {
           Row(
             children: [
               _StatCard(
-                icon: RadixIcons.Fire,
+                icon: RadixIcons.Rocket,
                 label: 'Streak',
                 value: '$_streakDays days',
                 color: Colors.orange,
@@ -422,14 +424,14 @@ class _SimulationPageState extends State<SimulationPage> {
           Row(
             children: [
               _StatCard(
-                icon: RadixIcons.Coins,
+                icon: RadixIcons.Pie_Chart,
                 label: 'Wallet',
                 value: _currency.format(_balance),
                 color: theme.colorScheme.primary,
               ),
               const SizedBox(width: 12),
               _StatCard(
-                icon: RadixIcons.Piggy_Bank,
+                icon: RadixIcons.Archive,
                 label: 'Savings',
                 value: _currency.format(_savings),
                 color: theme.colorScheme.secondary,
@@ -463,7 +465,7 @@ class _SimulationPageState extends State<SimulationPage> {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: _logExpense,
-                  icon: const Icon(RadixIcons.Credit_Card),
+                  icon: const Icon(RadixIcons.Card_Stack),
                   label: const Text('Spend'),
                 ),
               ),

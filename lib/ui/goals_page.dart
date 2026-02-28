@@ -43,6 +43,7 @@ class _GoalsPageState extends State<GoalsPage> {
     await showDialog(
       context: context,
       builder: (_) {
+        final navigator = Navigator.of(context);
         return AlertDialog(
           title: const Text('New goal'),
           content: Column(
@@ -83,9 +84,7 @@ class _GoalsPageState extends State<GoalsPage> {
                   'target_amount': target,
                 });
 
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
+                navigator.pop();
               },
               child: const Text('Save'),
             ),

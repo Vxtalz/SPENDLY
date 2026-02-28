@@ -12,7 +12,6 @@ ThemeData buildSpendlyTheme() {
       primary: primary,
       secondary: accentGreen,
       surface: surface,
-      background: Colors.white,
     ),
     scaffoldBackgroundColor: surface,
     appBarTheme: const AppBarTheme(
@@ -21,7 +20,7 @@ ThemeData buildSpendlyTheme() {
       centerTitle: true,
       foregroundColor: Colors.black,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),

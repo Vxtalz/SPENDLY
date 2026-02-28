@@ -41,15 +41,15 @@ class _BadgesPageState extends State<BadgesPage> {
   IconData _iconForBadge(String key) {
     switch (key) {
       case 'tipid_master':
-        return RadixIcons.Coins;
+        return RadixIcons.Pie_Chart;
       case 'debt_slayer':
-        return RadixIcons.Scissors;
+        return RadixIcons.Hobby_Knife;
       case 'consistent_saver':
         return RadixIcons.Check_Circled;
       case 'no_impulse_week':
         return RadixIcons.Stop;
       case 'perfect_streak':
-        return RadixIcons.Fire;
+        return RadixIcons.Star_Filled;
       default:
         return RadixIcons.Star;
     }

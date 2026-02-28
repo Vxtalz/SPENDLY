@@ -65,7 +65,7 @@ class _HistoryPageState extends State<HistoryPage> {
           final isIncome = amount > 0;
           final icon = switch (type) {
             'saving' => RadixIcons.Bookmark,
-            'expense' => RadixIcons.Credit_Card,
+            'expense' => RadixIcons.Card_Stack,
             _ => RadixIcons.Dot_Filled,
           };
 
