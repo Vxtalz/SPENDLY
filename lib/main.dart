@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'env.dart';
-import 'ui/auth_gate.dart';
+import 'ui/home_shell.dart';
 import 'ui/onboarding_page.dart';
 import 'ui/theme.dart';
 
@@ -83,7 +83,7 @@ class _RootGateState extends State<_RootGate> {
       return OnboardingPage(onFinished: _finishOnboarding);
     }
 
-    return const AuthGate();
+    return const HomeShell();
   }
 }
 

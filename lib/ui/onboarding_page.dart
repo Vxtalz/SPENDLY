@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:radix_icons/radix_icons.dart';
 
 class OnboardingPage extends StatelessWidget {
   final VoidCallback onFinished;
@@ -39,19 +38,19 @@ class OnboardingPage extends StatelessWidget {
                 child: PageView(
                   children: const [
                     _OnboardingSlide(
-                      icon: RadixIcons.Lightning_Bolt,
+                      icon: Icons.flash_on,
                       title: 'Practice money moves daily',
                       body:
                           'Get a virtual allowance every day and decide how to spend, save, or pay utang.',
                     ),
                     _OnboardingSlide(
-                      icon: RadixIcons.Bar_Chart,
+                      icon: Icons.bar_chart,
                       title: 'See your patterns clearly',
                       body:
                           'Weekly and 30-day reports show how much you actually spend and save.',
                     ),
                     _OnboardingSlide(
-                      icon: RadixIcons.Star,
+                      icon: Icons.star_border,
                       title: 'Earn badges for good habits',
                       body:
                           'Build streaks, hit savings goals, and unlock badges as you grow your money skills.',
@@ -104,7 +103,7 @@ class _OnboardingSlide extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
+              color: theme.colorScheme.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Icon(

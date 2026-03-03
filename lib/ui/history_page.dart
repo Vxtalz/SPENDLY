@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:radix_icons/radix_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HistoryPage extends StatefulWidget {
@@ -64,9 +63,9 @@ class _HistoryPageState extends State<HistoryPage> {
 
           final isIncome = amount > 0;
           final icon = switch (type) {
-            'saving' => RadixIcons.Bookmark,
-            'expense' => RadixIcons.Card_Stack,
-            _ => RadixIcons.Dot_Filled,
+            'saving' => Icons.bookmark_add_outlined,
+            'expense' => Icons.credit_card,
+            _ => Icons.circle,
           };
 
           return ListTile(

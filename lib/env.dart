@@ -1,6 +1,6 @@
 class Env {
   // TODO: Replace with your actual Supabase project credentials.
-  static const supabaseUrl = 'https://YOUR-PROJECT.supabase.co';
-  static const supabaseAnonKey = 'YOUR_ANON_PUBLIC_ANON_KEY';
+  static const supabaseUrl = 'https://bxraabtdukesnpkubcoi.supabase.co';
+  static const supabaseAnonKey = 'sb_publishable_0O0uJVxpIwfm3iU4FNvDwQ_FCtB8FCT';
 }
 

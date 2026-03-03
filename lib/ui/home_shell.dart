@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:radix_icons/radix_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'badges_page.dart';
 import 'goals_page.dart';
 import 'history_page.dart';
 import 'simulation_page.dart';
+import 'goal_setup_page.dart';
+import 'transactions_page.dart';
+import 'receipts_page.dart';
+import 'scenarios_page.dart';
+import 'premium_page.dart';
+import 'valuation_page.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -20,6 +25,11 @@ class _HomeShellState extends State<HomeShell> {
   final _pages = const [
     SimulationPage(),
     GoalsPage(),
+    TransactionsPage(),
+    ReceiptsPage(),
+    ScenariosPage(),
+    PremiumPage(),
+    ValuationPage(),
     HistoryPage(),
     BadgesPage(),
   ];
@@ -31,7 +41,16 @@ class _HomeShellState extends State<HomeShell> {
         title: const Text('Spendly'),
         actions: [
           IconButton(
-            icon: const Icon(RadixIcons.Exit),
+            tooltip: 'Set Spend Goal',
+            icon: const Icon(Icons.track_changes),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const GoalSetupPage()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await Supabase.instance.client.auth.signOut();
             },
@@ -46,19 +65,39 @@ class _HomeShellState extends State<HomeShell> {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(RadixIcons.Lightning_Bolt),
+            icon: Icon(Icons.flash_on),
             label: 'Daily',
           ),
           NavigationDestination(
-            icon: Icon(RadixIcons.Target),
+            icon: Icon(Icons.track_changes),
             label: 'Goals',
           ),
           NavigationDestination(
-            icon: Icon(RadixIcons.Bar_Chart),
+            icon: Icon(Icons.credit_card),
+            label: 'Transact',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.receipt_long_outlined),
+            label: 'Resibo',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.layers_outlined),
+            label: 'Scenarios',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.workspace_premium_outlined),
+            label: 'Premium',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite_border),
+            label: 'Value',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bar_chart),
             label: 'History',
           ),
           NavigationDestination(
-            icon: Icon(RadixIcons.Star),
+            icon: Icon(Icons.emoji_events_outlined),
             label: 'Badges',
           ),
         ],

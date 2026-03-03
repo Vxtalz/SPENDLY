@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:radix_icons/radix_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BadgesPage extends StatefulWidget {
@@ -41,17 +40,17 @@ class _BadgesPageState extends State<BadgesPage> {
   IconData _iconForBadge(String key) {
     switch (key) {
       case 'tipid_master':
-        return RadixIcons.Pie_Chart;
+        return Icons.pie_chart;
       case 'debt_slayer':
-        return RadixIcons.Hobby_Knife;
+        return Icons.content_cut;
       case 'consistent_saver':
-        return RadixIcons.Check_Circled;
+        return Icons.check_circle_outline;
       case 'no_impulse_week':
-        return RadixIcons.Stop;
+        return Icons.stop_circle_outlined;
       case 'perfect_streak':
-        return RadixIcons.Star_Filled;
+        return Icons.star;
       default:
-        return RadixIcons.Star;
+        return Icons.star_border;
     }
   }
 

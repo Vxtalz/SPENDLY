@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:radix_icons/radix_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class GoalsPage extends StatefulWidget {
@@ -124,7 +123,7 @@ class _GoalsPageState extends State<GoalsPage> {
                       children: [
                         Row(
                           children: [
-                            const Icon(RadixIcons.Target),
+                            const Icon(Icons.track_changes),
                             const SizedBox(width: 8),
                             Text(
                               name,
@@ -154,7 +153,7 @@ class _GoalsPageState extends State<GoalsPage> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createGoal,
-        child: const Icon(RadixIcons.Plus_Circled),
+        child: const Icon(Icons.add_circle_outline),
       ),
     );
   }

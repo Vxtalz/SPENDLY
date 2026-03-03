@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:radix_icons/radix_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SimulationPage extends StatefulWidget {
@@ -406,14 +405,14 @@ class _SimulationPageState extends State<SimulationPage> {
           Row(
             children: [
               _StatCard(
-                icon: RadixIcons.Rocket,
+                icon: Icons.rocket_launch_outlined,
                 label: 'Streak',
                 value: '$_streakDays days',
                 color: Colors.orange,
               ),
               const SizedBox(width: 12),
               _StatCard(
-                icon: RadixIcons.Star,
+                icon: Icons.star_outline,
                 label: 'Cycle',
                 value: '#$_cycleNumber',
                 color: Colors.amber,
@@ -424,14 +423,14 @@ class _SimulationPageState extends State<SimulationPage> {
           Row(
             children: [
               _StatCard(
-                icon: RadixIcons.Pie_Chart,
+                icon: Icons.pie_chart_outline,
                 label: 'Wallet',
                 value: _currency.format(_balance),
                 color: theme.colorScheme.primary,
               ),
               const SizedBox(width: 12),
               _StatCard(
-                icon: RadixIcons.Archive,
+                icon: Icons.archive_outlined,
                 label: 'Savings',
                 value: _currency.format(_savings),
                 color: theme.colorScheme.secondary,
@@ -440,7 +439,7 @@ class _SimulationPageState extends State<SimulationPage> {
           ),
           const SizedBox(height: 12),
           _StatCard(
-            icon: RadixIcons.Crosshair_1,
+            icon: Icons.sick_outlined,
             label: 'Debt',
             value: _currency.format(_debt),
             color: Colors.redAccent,
@@ -465,7 +464,7 @@ class _SimulationPageState extends State<SimulationPage> {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: _logExpense,
-                  icon: const Icon(RadixIcons.Card_Stack),
+                  icon: const Icon(Icons.credit_card),
                   label: const Text('Spend'),
                 ),
               ),
@@ -473,7 +472,7 @@ class _SimulationPageState extends State<SimulationPage> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _logSaving,
-                  icon: const Icon(RadixIcons.Bookmark),
+                  icon: const Icon(Icons.bookmark_border),
                   label: const Text('Save'),
                 ),
               ),
@@ -482,7 +481,7 @@ class _SimulationPageState extends State<SimulationPage> {
           const SizedBox(height: 20),
           FilledButton.tonalIcon(
             onPressed: _nextDay,
-            icon: const Icon(RadixIcons.Lightning_Bolt),
+            icon: const Icon(Icons.flash_on),
             label: const Text('Next day'),
           ),
           const SizedBox(height: 12),
