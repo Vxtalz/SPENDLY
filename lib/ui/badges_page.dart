@@ -12,6 +12,19 @@ class _BadgesPageState extends State<BadgesPage> {
   bool _loading = true;
   List<Map<String, dynamic>> _badges = [];
 
+  static const _primaryGreen = Color(0xFF22C55E);
+  static const _darkNavy = Color(0xFF0F172A);
+
+  static const _allBadges = [
+    ('tipid_master', 'Tipid Master', '💰', 'Saved at least 40% of spending for a full 30-day cycle with no debt.'),
+    ('debt_slayer', 'Debt Slayer', '⚔️', 'Paid off all debt by the end of a 30-day cycle.'),
+    ('consistent_saver', 'Consistent Saver', '✅', 'Saved money on at least 4 different days in a week.'),
+    ('no_impulse_week', 'No Impulse Week', '🛑', 'Kept "wants" spending under 20% of total spending for a week.'),
+    ('perfect_streak', 'Perfect Streak', '⭐', 'Played every day for 30 days straight.'),
+    ('weekly_saver', 'Weekly Saver', '🏆', 'Saved at least 30% of what you spent this week.'),
+    ('weekly_spender', 'Lesson Learned', '📚', 'Big spender week — you reflected and learned.'),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -37,107 +50,209 @@ class _BadgesPageState extends State<BadgesPage> {
     });
   }
 
-  IconData _iconForBadge(String key) {
-    switch (key) {
-      case 'tipid_master':
-        return Icons.pie_chart;
-      case 'debt_slayer':
-        return Icons.content_cut;
-      case 'consistent_saver':
-        return Icons.check_circle_outline;
-      case 'no_impulse_week':
-        return Icons.stop_circle_outlined;
-      case 'perfect_streak':
-        return Icons.star;
-      default:
-        return Icons.star_border;
-    }
-  }
-
-  String _descriptionForBadge(String key) {
-    switch (key) {
-      case 'tipid_master':
-        return 'Saved at least 40% of spending for a full 30-day cycle with no debt.';
-      case 'debt_slayer':
-        return 'Paid off all debt by the end of a 30-day cycle.';
-      case 'consistent_saver':
-        return 'Saved money on at least 4 different days in a week.';
-      case 'no_impulse_week':
-        return 'Kept “wants” spending under 20% of total spending for a week.';
-      case 'perfect_streak':
-        return 'Played every day for 30 days straight.';
-      default:
-        return 'Special achievement in your money journey.';
-    }
+  bool _hasBadge(String key) {
+    return _badges.any((b) => (b['badge_key'] as String) == key);
   }
 
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_badges.isEmpty) {
       return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text(
-            'No badges yet.\nKeep practicing daily to unlock achievements!',
-            textAlign: TextAlign.center,
-          ),
-        ),
+        child: CircularProgressIndicator(color: Color(0xFF22C55E)),
       );
     }
 
+    final earnedCount = _badges.length;
+
     return RefreshIndicator(
       onRefresh: _loadBadges,
-      child: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.1,
-        ),
-        itemCount: _badges.length,
-        itemBuilder: (_, index) {
-          final badge = _badges[index];
-          final key = badge['badge_key'] as String;
-          final label = badge['label'] as String;
-          final icon = _iconForBadge(key);
-          final desc = _descriptionForBadge(key);
-
-          return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 36, color: Colors.amber[700]),
-                  const SizedBox(height: 8),
-                  Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+      child: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          // Dark purple hero: Spendly Score + rank chip
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF5B21B6),
+                  Color(0xFF4C1D95),
+                  Color(0xFF3B0764),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Spendly Score',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '72',
+                  style: TextStyle(
+                    color: Color(0xFFFDE047),
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFDE047).withOpacity(0.25),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: const Text(
+                    'Rising Saver',
+                    style: TextStyle(
+                      color: Color(0xFFFDE047),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          // GridView 3 columns: badge cards, locked with reduced opacity
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 3,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.82,
+            children: _allBadges.map((b) {
+              final key = b.$1;
+              final name = b.$2;
+              final emoji = b.$3;
+              final desc = b.$4;
+              final unlocked = _hasBadge(key);
+              return Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: unlocked
+                        ? _primaryGreen.withOpacity(0.4)
+                        : const Color(0xFFE5E7EB),
+                  ),
+                ),
+                child: Opacity(
+                  opacity: unlocked ? 1.0 : 0.5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(emoji, style: const TextStyle(fontSize: 32)),
+                        const SizedBox(height: 8),
+                        Text(
+                          name,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            color: unlocked ? _darkNavy : Colors.grey.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          desc,
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 9,
+                            color: Colors.grey.shade600,
+                            height: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 20),
+          // Weekly progress card
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Weekly progress',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: _darkNavy,
+                        ),
+                      ),
+                      Text(
+                        '$earnedCount / ${_allBadges.length} badges',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: LinearProgressIndicator(
+                      value: earnedCount / _allBadges.length,
+                      minHeight: 8,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(_primaryGreen),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   Text(
-                    desc,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey,
+                    'Keep playing daily to unlock more!',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
                     ),
                   ),
                 ],
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 }
-

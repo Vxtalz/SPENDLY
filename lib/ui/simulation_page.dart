@@ -384,155 +384,222 @@ class _SimulationPageState extends State<SimulationPage> {
     }
   }
 
+  static const _primaryGreen = Color(0xFF22C55E);
+  static const _darkNavy = Color(0xFF0F172A);
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(color: Color(0xFF22C55E)));
     }
 
-    final theme = Theme.of(context);
+    final daysLeft = 30 - _currentDay + 1;
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        children: [
-          Text(
-            'Day $_currentDay • Cycle $_cycleNumber',
-            style: theme.textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        // Active scenario card: countdown, emoji, question, choices
+        Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: const BorderSide(color: Color(0xFFE5E7EB)),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _StatCard(
-                icon: Icons.rocket_launch_outlined,
-                label: 'Streak',
-                value: '$_streakDays days',
-                color: Colors.orange,
-              ),
-              const SizedBox(width: 12),
-              _StatCard(
-                icon: Icons.star_outline,
-                label: 'Cycle',
-                value: '#$_cycleNumber',
-                color: Colors.amber,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              _StatCard(
-                icon: Icons.pie_chart_outline,
-                label: 'Wallet',
-                value: _currency.format(_balance),
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 12),
-              _StatCard(
-                icon: Icons.archive_outlined,
-                label: 'Savings',
-                value: _currency.format(_savings),
-                color: theme.colorScheme.secondary,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _StatCard(
-            icon: Icons.sick_outlined,
-            label: 'Debt',
-            value: _currency.format(_debt),
-            color: Colors.redAccent,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'What will you do with today\'s money?',
-            style: theme.textTheme.titleMedium,
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _amountController,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Amount (₱)',
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Day $_currentDay of 30',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _primaryGreen.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '$daysLeft days left',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _primaryGreen,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text('💰', style: TextStyle(fontSize: 48)),
+                const SizedBox(height: 8),
+                Text(
+                  'Morning',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'What will you do with today\'s money?',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: _darkNavy,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Enter an amount below, then choose to spend it or save it. Each day you get a fresh allowance.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _amountController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'Amount (₱)',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Two choice cards: red spend, green save
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _amountController,
+                  builder: (_, value, __) {
+                    final costStr = value.text.trim().isEmpty
+                        ? '—'
+                        : _currency.format(double.tryParse(value.text) ?? 0);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _DailyChoiceCard(
+                          label: 'Spend',
+                          hint: 'Use it for food, transport, or wants',
+                          cost: costStr,
+                          isSpend: true,
+                          onTap: _logExpense,
+                        ),
+                        const SizedBox(height: 10),
+                        _DailyChoiceCard(
+                          label: 'Save',
+                          hint: 'Move it to savings for your goals',
+                          cost: costStr,
+                          isSpend: false,
+                          onTap: _logSaving,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _nextDay,
+                    icon: const Icon(Icons.flash_on, size: 20),
+                    label: const Text('Next day'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _darkNavy,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: _logExpense,
-                  icon: const Icon(Icons.credit_card),
-                  label: const Text('Spend'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _logSaving,
-                  icon: const Icon(Icons.bookmark_border),
-                  label: const Text('Save'),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          FilledButton.tonalIcon(
-            onPressed: _nextDay,
-            icon: const Icon(Icons.flash_on),
-            label: const Text('Next day'),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Each day gives you a fresh allowance. '
-            'Your choices today build your habits over time.',
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: Colors.grey[600]),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'Wallet: ${_currency.format(_balance)} · Savings: ${_currency.format(_savings)} · Streak: $_streakDays days',
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final IconData icon;
+class _DailyChoiceCard extends StatelessWidget {
   final String label;
-  final String value;
-  final Color color;
+  final String hint;
+  final String cost;
+  final bool isSpend;
+  final VoidCallback onTap;
 
-  const _StatCard({
-    required this.icon,
+  const _DailyChoiceCard({
     required this.label,
-    required this.value,
-    required this.color,
+    required this.hint,
+    required this.cost,
+    required this.isSpend,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Expanded(
-      child: Card(
+    final color = isSpend ? const Color(0xFFDC2626) : const Color(0xFF22C55E);
+    return Material(
+      color: color.withOpacity(0.08),
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
             children: [
-              Icon(icon, color: color),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: theme.textTheme.labelMedium
-                    ?.copyWith(color: Colors.grey[600]),
+              Icon(isSpend ? Icons.shopping_bag_outlined : Icons.savings_outlined,
+                  color: color, size: 28),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                    Text(
+                      hint,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 4),
               Text(
-                value,
-                style: theme.textTheme.titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                cost,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                ),
               ),
             ],
           ),
