@@ -1,0 +1,56 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "SPENDLY (Brave)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "-d",
+        "chrome",
+        "--web-renderer",
+        "html"
+      ],
+      "env": {
+        "CHROME_EXECUTABLE": "C:\\Users\\Jethro Clark Cocal\\AppData\\Local\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+      },
+      "toolArgs": [
+        "--web-browser-flag",
+        "--no-sandbox"
+      ]
+    },
+    {
+      "name": "SPENDLY (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "-d",
+        "chrome"
+      ]
+    },
+    {
+      "name": "SPENDLY (Firefox)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "-d",
+        "web-server",
+        "--web-port",
+        "8080"
+      ]
+    },
+    {
+      "name": "SPENDLY (Edge)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "debug",
+      "args": [
+        "-d",
+        "edge"
+      ]
+    }
+  ]
+}

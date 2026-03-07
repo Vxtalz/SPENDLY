@@ -1,0 +1,11 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Force Unlock & Clean",
+            "type": "shell",
+            "command": "taskkill /F /IM dart.exe /T; taskkill /F /IM brave.exe /T; flutter clean",
+            "problemMatcher": []
+        }
+    ]
+}

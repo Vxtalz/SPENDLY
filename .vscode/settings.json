@@ -1,0 +1,7 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "terminal.integrated.env.windows": {
+        "CHROME_EXECUTABLE": "C:\\Users\\Jethro Clark Cocal\\AppData\\Local\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
+        "PUB_CACHE": "C:\\pub_cache"
+    }
+}
