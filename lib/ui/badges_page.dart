@@ -137,17 +137,28 @@ class _BadgesPageState extends State<BadgesPage> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  '72',
-                  style: TextStyle(
-                    color: Color(0xFFFDE047),
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    height: 1.1,
-                  ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.emoji_events_outlined,
+                      color: Color(0xFFFDE047),
+                      size: 64,
+                    ),
+                    const SizedBox(width: 20),
+                    const Text(
+                      '72',
+                      style: TextStyle(
+                        color: Color(0xFFFDE047),
+                        fontSize: 64,
+                        fontWeight: FontWeight.bold,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 6),

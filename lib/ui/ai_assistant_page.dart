@@ -60,7 +60,7 @@ class _AiAssistantPageState extends ConsumerState<AiAssistantPage> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
-              'Know your money, know yourself',
+              'Learn it. Track it. Live it. One day at a time.',
               style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
             ),
           ],
@@ -133,7 +133,7 @@ class _ChatBubble extends StatelessWidget {
           boxShadow: [
             if (!message.isUser)
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -168,7 +168,7 @@ class _ChatInput extends StatelessWidget {
         color: Theme.of(context).cardColor,
         border: Border(
             top: BorderSide(
-                color: Theme.of(context).dividerColor.withOpacity(0.1))),
+                color: Theme.of(context).dividerColor.withValues(alpha: 0.1))),
       ),
       child: SafeArea(
         child: Row(
@@ -228,10 +228,11 @@ class _EmptyChatPlaceholder extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: const Color(0xFFC0FF00).withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.auto_awesome, color: Colors.blue, size: 48),
+            child: const Icon(Icons.auto_awesome,
+                color: Color(0xFFC0FF00), size: 48),
           ),
           const SizedBox(height: 24),
           Text(
@@ -273,7 +274,7 @@ class _ThinkingIndicator extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -295,7 +296,10 @@ class _ThinkingIndicator extends StatelessWidget {
               'Thinking...',
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.7),
               ),
             ),
           ],

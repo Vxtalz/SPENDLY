@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../models.dart';
 import '../providers/goal_provider.dart';
+import 'widgets/interactive_widgets.dart';
 
 class GoalSetupPage extends ConsumerStatefulWidget {
   const GoalSetupPage({super.key});
@@ -26,18 +26,25 @@ class _GoalSetupPageState extends ConsumerState<GoalSetupPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Set Goal to Spend')),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Choose period'),
-            const SizedBox(height: 8),
+            const Text('Choose period',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
             DropdownButtonFormField<GoalPeriod>(
-              initialValue: _period,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
+              value: _period,
+              decoration: InputDecoration(
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                filled: true,
+                fillColor: Colors.grey.withValues(alpha: 0.05),
+              ),
               items: const [
                 DropdownMenuItem(value: GoalPeriod.daily, child: Text('Daily')),
-                DropdownMenuItem(value: GoalPeriod.weekly, child: Text('Weekly')),
+                DropdownMenuItem(
+                    value: GoalPeriod.weekly, child: Text('Weekly')),
               ],
               onChanged: (v) => setState(() => _period = v ?? GoalPeriod.daily),
             ),
@@ -45,16 +52,19 @@ class _GoalSetupPageState extends ConsumerState<GoalSetupPage> {
             TextField(
               controller: _controller,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Amount (₱)',
-                border: OutlineInputBorder(),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
-              child: FilledButton(
-                onPressed: () {
+              height: 56,
+              child: InteractiveButton(
+                isPrimary: true,
+                onTap: () {
                   final pesos = int.tryParse(_controller.text.trim());
                   if (pesos == null || pesos <= 0) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -65,7 +75,18 @@ class _GoalSetupPageState extends ConsumerState<GoalSetupPage> {
                   ref.read(goalProvider.notifier).setGoal(_period, pesos * 100);
                   Navigator.pop(context);
                 },
-                child: const Text('Save Goal'),
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFC0FF00),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text('Save Goal',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16)),
+                ),
               ),
             ),
           ],

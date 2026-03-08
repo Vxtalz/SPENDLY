@@ -11,10 +11,9 @@ import 'premium_page.dart';
 import 'settings_page.dart';
 import 'ai_assistant_page.dart';
 import '../providers/scenario_provider.dart';
-// import '../providers/goal_provider.dart';
-// import '../providers/transaction_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/simulation_provider.dart';
+import 'widgets/interactive_widgets.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -50,61 +49,46 @@ class _HomeShellState extends State<HomeShell> {
                 decoration: BoxDecoration(
                   color: Theme.of(context).scaffoldBackgroundColor,
                   border: Border(
-                    bottom: BorderSide(
-                      color:
-                          Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                      width: 1,
-                    ),
-                  ),
+                      bottom: BorderSide(
+                          color: Theme.of(context)
+                              .dividerColor
+                              .withValues(alpha: 0.1),
+                          width: 1)),
                 ),
                 child: Row(
                   children: [
-                    // Flag icon
                     Container(
-                      width: 32,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                        image: const DecorationImage(
-                          image: NetworkImage('https://flagcdn.com/w40/ph.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
+                        width: 32,
+                        height: 24,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            image: const DecorationImage(
+                                image: NetworkImage(
+                                    'https://flagcdn.com/w40/ph.png'),
+                                fit: BoxFit.cover))),
                     const Spacer(),
-                    // Fire / Streak
                     _topStat(
-                      icon: Icons.local_fire_department_rounded,
-                      value: simState.streakDays.toString(),
-                      color: const Color(0xFFC0FF00), // Electric Lime
-                    ),
+                        icon: Icons.local_fire_department_rounded,
+                        value: simState.streakDays.toString(),
+                        color: const Color(0xFFC0FF00)),
                     const SizedBox(width: 16),
-                    // Gems / Currency
                     _topStat(
-                      icon: Icons.diamond,
-                      value: '500',
-                      color: const Color(0xFF6A5AE0), // Deep Violet
-                    ),
+                        icon: Icons.diamond,
+                        value: '500',
+                        color: const Color(0xFF6A5AE0)),
                     const SizedBox(width: 16),
-                    // Hearts / Lives
                     _topStat(
-                      icon: Icons.favorite,
-                      value: '5',
-                      color: const Color(0xFFFF4B4B),
-                    ),
+                        icon: Icons.favorite,
+                        value: '5',
+                        color: const Color(0xFFFF4B4B)),
                     const SizedBox(width: 12),
-                    // Menu Button
                     Builder(
-                      builder: (ctx) => GestureDetector(
-                        onTap: () => Scaffold.of(ctx).openEndDrawer(),
-                        child: Icon(
-                          Icons.menu,
-                          color: Theme.of(context).colorScheme.onSurface,
-                          size: 26,
-                        ),
-                      ),
-                    ),
+                        builder: (ctx) => GestureDetector(
+                            onTap: () => Scaffold.of(ctx).openEndDrawer(),
+                            child: Icon(Icons.menu,
+                                color: Theme.of(context).colorScheme.onSurface,
+                                size: 26))),
                   ],
                 ),
               );
@@ -118,26 +102,20 @@ class _HomeShellState extends State<HomeShell> {
             padding: const EdgeInsets.symmetric(vertical: 24),
             children: [
               DrawerHeader(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color:
-                          Theme.of(context).dividerColor.withValues(alpha: 0.1),
-                      width: 1,
-                    ),
-                  ),
-                ),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ),
+                  decoration: BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(
+                              color: Theme.of(context)
+                                  .dividerColor
+                                  .withValues(alpha: 0.1),
+                              width: 1))),
+                  child: Text('Menu',
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface))),
               _drawerTile('Profile', Icons.person_outline,
-                  () => _openPlaceholder(context, 'Profile')),
+                  () => Navigator.pop(context)),
               _drawerTile('History', Icons.bar_chart,
                   () => _openThenClose(context, const HistoryPage())),
               _drawerTile('Premium', Icons.workspace_premium_outlined,
@@ -145,25 +123,20 @@ class _HomeShellState extends State<HomeShell> {
               _drawerTile('Settings', Icons.settings_outlined,
                   () => _openThenClose(context, const SettingsPage())),
               const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Divider(height: 32),
-              ),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Divider(height: 32)),
               Consumer(
-                builder: (context, ref, _) => ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.redAccent),
-                  title: const Text(
-                    'Logout',
-                    style: TextStyle(
-                      color: Colors.redAccent,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    await ref.read(authProvider.notifier).signOut();
-                  },
-                ),
-              ),
+                  builder: (context, ref, _) => ListTile(
+                      leading:
+                          const Icon(Icons.logout, color: Colors.redAccent),
+                      title: const Text('Logout',
+                          style: TextStyle(
+                              color: Colors.redAccent,
+                              fontWeight: FontWeight.bold)),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await ref.read(authProvider.notifier).signOut();
+                      })),
             ],
           ),
         ),
@@ -171,14 +144,12 @@ class _HomeShellState extends State<HomeShell> {
       body: _pages[_index],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
-          border: Border(
-            top: BorderSide(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-              width: 1,
-            ),
-          ),
-        ),
+            color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+            border: Border(
+                top: BorderSide(
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    width: 1))),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
@@ -200,38 +171,12 @@ class _HomeShellState extends State<HomeShell> {
           ),
         ),
       ),
-      floatingActionButton: Container(
-        height: 64,
-        width: 64,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF6A5AE0), Color(0xFF8B5CF6)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF6A5AE0).withValues(alpha: 0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: FloatingActionButton(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AiAssistantPage()),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          highlightElevation: 0,
-          child: const Icon(
-            Icons.auto_awesome,
-            color: Color(0xFFC0FF00),
-            size: 30,
-          ),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const AiAssistantPage())),
+        backgroundColor: const Color(0xFF6A5AE0),
+        child:
+            const Icon(Icons.auto_awesome, color: Color(0xFFC0FF00), size: 30),
       ),
     );
   }
@@ -239,29 +184,21 @@ class _HomeShellState extends State<HomeShell> {
   Widget _topStat(
       {required IconData icon, required String value, required Color color}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 6),
-          Text(
-            value,
-            style: TextStyle(
-              color: color == const Color(0xFFC0FF00)
-                  ? const Color(0xFF1A1A1A)
-                  : color,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
+          Text(value,
+              style: TextStyle(
+                  color: color == const Color(0xFFC0FF00)
+                      ? const Color(0xFF1A1A1A)
+                      : color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14))
+        ]));
   }
 
   Widget _navIcon(int index, IconData icon, Color color) {
@@ -269,27 +206,23 @@ class _HomeShellState extends State<HomeShell> {
     return GestureDetector(
       onTap: () => setState(() => _index = index),
       child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (color == const Color(0xFFC0FF00)
-                  ? color
-                  : color.withValues(alpha: 0.1))
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Icon(
-          icon,
-          size: 26,
-          color: isSelected
-              ? (color == const Color(0xFFC0FF00)
-                  ? (Theme.of(context).brightness == Brightness.dark
-                      ? Colors.black
-                      : const Color(0xFF1A1A1A))
-                  : color)
-              : const Color(0xFF94A3B8),
-        ),
-      ),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+              color: isSelected
+                  ? (color == const Color(0xFFC0FF00)
+                      ? color
+                      : color.withValues(alpha: 0.1))
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(16)),
+          child: Icon(icon,
+              size: 26,
+              color: isSelected
+                  ? (color == const Color(0xFFC0FF00)
+                      ? (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black
+                          : const Color(0xFF1A1A1A))
+                      : color)
+                  : const Color(0xFF94A3B8))),
     );
   }
 
@@ -298,27 +231,13 @@ class _HomeShellState extends State<HomeShell> {
     Navigator.push(context, MaterialPageRoute(builder: (_) => page));
   }
 
-  void _openPlaceholder(BuildContext context, String title) {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          appBar: AppBar(title: Text(title)),
-          body: Center(child: Text('$title — Coming soon')),
-        ),
-      ),
-    );
-  }
-
   Widget _drawerTile(String label, IconData icon, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon,
-          color:
-              Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
-      title: Text(label),
-      onTap: onTap,
-    );
+        leading: Icon(icon,
+            color:
+                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+        title: Text(label),
+        onTap: onTap);
   }
 }
 
@@ -332,70 +251,54 @@ class _HomeTabBody extends ConsumerWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Unit Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(28),
             margin: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF6A5AE0), Color(0xFF8B5CF6)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF6A5AE0).withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
+                gradient: const LinearGradient(
+                    colors: [Color(0xFF6A5AE0), Color(0xFF8B5CF6)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight),
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                      color: const Color(0xFF6A5AE0).withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10))
+                ]),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text(
-                    'UNIT 1',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(12)),
+                    child: const Text('UNIT 1',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            letterSpacing: 1.2))),
                 const SizedBox(height: 16),
-                Text(
-                  'Master the basics of spending and saving',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
+                Text('Master the basics',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: const LinearProgressIndicator(
-                    value: 0.4,
-                    backgroundColor: Colors.white24,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFFC0FF00)),
-                    minHeight: 8,
-                  ),
-                ),
+                    borderRadius: BorderRadius.circular(8),
+                    child: const LinearProgressIndicator(
+                        value: 0.4,
+                        backgroundColor: Colors.white24,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFFC0FF00)),
+                        minHeight: 8)),
               ],
             ),
           ),
           const SizedBox(height: 40),
-          // Journey Path
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -405,8 +308,6 @@ class _HomeTabBody extends ConsumerWidget {
               final pack = packs[index];
               final isActive = pack.modules.any((m) => !m.completed);
               final isCompleted = pack.modules.every((m) => m.completed);
-
-              // Circular offset for the path
               final offset = (index % 4 == 0)
                   ? 0.0
                   : (index % 4 == 1 || index % 4 == 3)
@@ -415,49 +316,34 @@ class _HomeTabBody extends ConsumerWidget {
 
               return Padding(
                 padding: EdgeInsets.only(
-                  left: offset,
-                  right: 100 - offset,
-                  bottom: 40,
-                ),
+                    left: offset, right: 100 - offset, bottom: 40),
                 child: _JourneyNode(
                   title: pack.title,
                   isActive: isActive,
                   isCompleted: isCompleted,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ScenariosPage(),
-                    ),
-                  ),
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const ScenariosPage())),
                 ),
               );
             },
           ),
-          // Mascot / Info
           Container(
             margin: const EdgeInsets.all(20),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFFC0FF00).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                  color: const Color(0xFFC0FF00).withValues(alpha: 0.3)),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.bolt_rounded, color: Color(0xFF1A1A1A), size: 32),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    "You're 40% through Unit 1. Keep it up!",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A1A1A),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                color: const Color(0xFFC0FF00).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                    color: const Color(0xFFC0FF00).withValues(alpha: 0.3))),
+            child: const Row(children: [
+              Icon(Icons.bolt_rounded, color: Color(0xFF1A1A1A), size: 32),
+              SizedBox(width: 16),
+              Expanded(
+                  child: Text("Keep it up! You're doing great.",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1A1A1A))))
+            ]),
           ),
           const SizedBox(height: 100),
         ],
@@ -472,12 +358,11 @@ class _JourneyNode extends StatelessWidget {
   final bool isCompleted;
   final VoidCallback onTap;
 
-  const _JourneyNode({
-    required this.title,
-    required this.isActive,
-    required this.isCompleted,
-    required this.onTap,
-  });
+  const _JourneyNode(
+      {required this.title,
+      required this.isActive,
+      required this.isCompleted,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -499,41 +384,28 @@ class _JourneyNode extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GestureDetector(
+        InteractiveButton(
           onTap: onTap,
+          isPrimary: isActive,
           child: Container(
             width: 80,
             height: 80,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             child: Center(
-              child: Icon(icon,
-                  color: isCompleted || isActive
-                      ? contentColor
-                      : const Color(0xFF94A3B8),
-                  size: 40),
-            ),
+                child: Icon(icon,
+                    color: isCompleted || isActive
+                        ? contentColor
+                        : const Color(0xFF94A3B8),
+                    size: 40)),
           ),
         ),
         const SizedBox(height: 12),
-        Text(
-          title.toUpperCase(),
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 11,
-            color: Theme.of(context).colorScheme.onSurface,
-            letterSpacing: 1.1,
-          ),
-        ),
+        Text(title.toUpperCase(),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+                color: Theme.of(context).colorScheme.onSurface,
+                letterSpacing: 1.1)),
       ],
     );
   }

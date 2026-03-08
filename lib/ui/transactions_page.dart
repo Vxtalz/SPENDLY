@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'widgets/interactive_widgets.dart';
 
 import '../models.dart';
 import '../providers/transaction_provider.dart';
@@ -186,6 +187,31 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.lightbulb_outline,
+                color: Color(0xFFC0FF00),
+                size: 40,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  totalExpense > displayIncome
+                      ? "Keep it up! Your spending is a bit high today, but we can fix it!"
+                      : "Looking good! You're making smart money moves today.",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: onSurface.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         Divider(height: 1, color: dividerColor),
         Expanded(
           child: ListView(
@@ -278,44 +304,57 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () async {
-                    final pesos = int.tryParse(_amountCtrl.text.trim());
-                    if (pesos == null || pesos <= 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Enter valid amount')),
+              InteractiveButton(
+                onTap: () async {
+                  final pesos = int.tryParse(_amountCtrl.text.trim());
+                  if (pesos == null || pesos <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Enter valid amount')),
+                    );
+                    return;
+                  }
+                  await ref.read(transactionListProvider.notifier).add(
+                        amountCents: pesos * 100,
+                        category: _categoryCtrl.text.trim().isEmpty
+                            ? 'Other'
+                            : _categoryCtrl.text.trim(),
+                        note: _noteCtrl.text.trim().isEmpty
+                            ? null
+                            : _noteCtrl.text.trim(),
                       );
-                      return;
-                    }
-                    await ref.read(transactionListProvider.notifier).add(
-                          amountCents: pesos * 100,
-                          category: _categoryCtrl.text.trim().isEmpty
-                              ? 'Other'
-                              : _categoryCtrl.text.trim(),
-                          note: _noteCtrl.text.trim().isEmpty
-                              ? null
-                              : _noteCtrl.text.trim(),
-                        );
-                    await ref
-                        .read(goalProvider.notifier)
-                        .addSpending(pesos * 100);
-                    _amountCtrl.clear();
-                    _noteCtrl.clear();
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: isDark
+                  await ref
+                      .read(goalProvider.notifier)
+                      .addSpending(pesos * 100);
+                  _amountCtrl.clear();
+                  _noteCtrl.clear();
+
+                  // Pulse of success
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Transaction saved!')),
+                    );
+                  }
+                },
+                isPrimary: true,
+                isSuccess: true,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: isDark
                         ? const Color(0xFFC0FF00)
                         : const Color(0xFF1A1A1A),
-                    foregroundColor: isDark ? Colors.black : Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'SAVE TRANSACTION',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.black : Colors.white,
+                      ),
                     ),
                   ),
-                  child: const Text('Add Transaction',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

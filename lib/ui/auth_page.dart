@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/auth_provider.dart';
+import 'widgets/interactive_widgets.dart';
 
 class AuthPage extends ConsumerStatefulWidget {
   const AuthPage({super.key});
@@ -16,13 +17,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   bool _isLogin = true;
   bool _isLoading = false;
   String? _errorMessage;
-  bool _showResend = false;
+  bool _triggerShake = false;
 
   void _toggleForm() {
     setState(() {
       _isLogin = !_isLogin;
       _errorMessage = null;
-      _showResend = false;
     });
   }
 
@@ -32,6 +32,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     setState(() {
       _errorMessage = null;
       _isLoading = true;
+      _triggerShake = false;
     });
     try {
       if (_isLogin) {
@@ -45,25 +46,22 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               _passwordController.text,
             );
       }
-      // Navigation is handled by AuthGate
     } on AuthException catch (e) {
       if (mounted) {
         setState(() {
+          _triggerShake = true;
           if (e.code == 'email_not_confirmed') {
-            _errorMessage =
-                'Email not confirmed. Please check your inbox for the verification link.';
-            _showResend = true;
+            _errorMessage = 'Email not confirmed. Please check your inbox.';
           } else {
             _errorMessage = e.message;
-            _showResend = false;
           }
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
+          _triggerShake = true;
           _errorMessage = e.toString();
-          _showResend = false;
         });
       }
     } finally {
@@ -71,37 +69,6 @@ class _AuthPageState extends ConsumerState<AuthPage> {
         setState(() {
           _isLoading = false;
         });
-      }
-    }
-  }
-
-  Future<void> _resendEmail() async {
-    if (_isLoading) return;
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    try {
-      await ref
-          .read(authProvider.notifier)
-          .resendEmailConfirmation(_emailController.text);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Verification link resent! Check your inbox.')),
-        );
-      }
-    } on AuthException catch (e) {
-      if (mounted) {
-        setState(() => _errorMessage = e.message);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _errorMessage = e.toString());
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
@@ -114,17 +81,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     try {
       await ref.read(authProvider.notifier).signInAnonymously();
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString();
-        });
-      }
+      if (mounted) setState(() => _errorMessage = e.toString());
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -134,81 +93,125 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       appBar: AppBar(
         title: Text(_isLogin ? 'Login' : 'Sign Up'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 40),
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
               obscureText: true,
             ),
             const SizedBox(height: 24),
             if (_errorMessage != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
-                child: Column(
-                  children: [
-                    Text(
-                      _errorMessage!,
-                      style:
-                          TextStyle(color: Theme.of(context).colorScheme.error),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (_showResend)
-                      TextButton(
-                        onPressed: _isLoading ? null : _resendEmail,
-                        child: const Text('Resend Verification Link'),
-                      ),
-                  ],
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  textAlign: TextAlign.center,
                 ),
               ),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _submit,
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : Text(_isLogin ? 'Login' : 'Create Account'),
-            ),
-            TextButton(
-              onPressed: _isLoading ? null : _toggleForm,
-              child: Text(
-                _isLogin
-                    ? 'Don\'t have an account? Sign up'
-                    : 'Already have an account? Login',
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: InteractiveButton(
+                isPrimary: true,
+                isError: _triggerShake,
+                onTap: _submit,
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : Text(_isLogin ? 'Login' : 'Create Account',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16)),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: _isLoading ? null : _toggleForm,
+              child: Text(_isLogin
+                  ? 'Don\'t have an account? Sign up'
+                  : 'Already have an account? Login'),
+            ),
+            const SizedBox(height: 32),
             const Row(
               children: [
                 Expanded(child: Divider()),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('OR', style: TextStyle(color: Colors.grey)),
-                ),
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('OR', style: TextStyle(color: Colors.grey))),
                 Expanded(child: Divider()),
               ],
             ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _isLoading ? null : _continueAsGuest,
-              icon: const Icon(Icons.person_outline),
-              label: const Text('Continue as Guest'),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: InteractiveButton(
+                isPrimary: true, // Enable premium shadow and animations
+                onTap: _continueAsGuest,
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.15),
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person_outline,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Continue as Guest',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../providers/scenario_provider.dart';
+import 'widgets/interactive_widgets.dart';
 
 class ScenariosPage extends ConsumerWidget {
   const ScenariosPage({super.key});
@@ -45,13 +45,13 @@ class ScenariosPage extends ConsumerWidget {
             const Color(0xFF6A5AE0),
             const Color(0xFFC0FF00),
             const Color(0xFF00D1FF),
-            const Color(0xFFFF4B4B),
+            const Color(0xFFFF4B4B)
           ];
           final List<Color> shadowColors = [
             const Color(0xFF5348B2),
             const Color(0xFF98CA28),
             const Color(0xFF00A3C7),
-            const Color(0xFFD38B9C),
+            const Color(0xFFD38B9C)
           ];
 
           final color = colors[packIndex % colors.length];
@@ -66,15 +66,12 @@ class ScenariosPage extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: shadowColor,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                      color: color,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                            color: shadowColor, offset: const Offset(0, 4))
+                      ]),
                   child: Row(
                     children: [
                       const Icon(Icons.auto_stories,
@@ -84,27 +81,21 @@ class ScenariosPage extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              p.title,
-                              style: TextStyle(
-                                color: isLime
-                                    ? const Color(0xFF1A1A1A)
-                                    : Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              p.topic,
-                              style: TextStyle(
-                                color: isLime
-                                    ? const Color(0xFF1A1A1A)
-                                        .withValues(alpha: 0.7)
-                                    : Colors.white70,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            Text(p.title,
+                                style: TextStyle(
+                                    color: isLime
+                                        ? const Color(0xFF1A1A1A)
+                                        : Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold)),
+                            Text(p.topic,
+                                style: TextStyle(
+                                    color: isLime
+                                        ? const Color(0xFF1A1A1A)
+                                            .withValues(alpha: 0.7)
+                                        : Colors.white70,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -118,75 +109,70 @@ class ScenariosPage extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: Theme.of(context)
-                                .dividerColor
-                                .withValues(alpha: 0.1),
-                            width: 2),
-                      ),
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: Theme.of(context)
+                                  .dividerColor
+                                  .withValues(alpha: 0.1),
+                              width: 2)),
                       child: Row(
                         children: [
                           Icon(
-                            m.completed
-                                ? Icons.check_circle
-                                : Icons.circle_outlined,
-                            color: m.completed
-                                ? const Color(0xFF58CC02)
-                                : const Color(0xFFE5E5E5),
-                          ),
+                              m.completed
+                                  ? Icons.check_circle
+                                  : Icons.circle_outlined,
+                              color: m.completed
+                                  ? const Color(0xFF58CC02)
+                                  : const Color(0xFFE5E5E5)),
                           const SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  m.title,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: m.completed
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF1A1A1A),
-                                    decoration: m.completed
-                                        ? TextDecoration.lineThrough
-                                        : null,
-                                  ),
-                                ),
+                                Text(m.title,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: m.completed
+                                            ? const Color(0xFF94A3B8)
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                        decoration: m.completed
+                                            ? TextDecoration.lineThrough
+                                            : null)),
                                 if (!m.completed)
-                                  Text(
-                                    m.description,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFFAFAFAF),
-                                    ),
-                                  ),
+                                  Text(m.description,
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.6))),
                               ],
                             ),
                           ),
                           if (!m.completed)
-                            SizedBox(
-                              height: 36,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final messenger =
-                                      ScaffoldMessenger.of(context);
-                                  await ref
-                                      .read(scenarioPacksProvider.notifier)
-                                      .markModuleCompleted(m.id);
-                                  messenger.showSnackBar(SnackBar(
-                                      content: Text('Completed: ${m.title}')));
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1A1A1A),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
+                            InteractiveButton(
+                              isPrimary: true,
+                              onTap: () async {
+                                final messenger = ScaffoldMessenger.of(context);
+                                await ref
+                                    .read(scenarioPacksProvider.notifier)
+                                    .markModuleCompleted(m.id);
+                                messenger.showSnackBar(SnackBar(
+                                    content: Text('Completed: ${m.title}')));
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                decoration: BoxDecoration(
+                                    color: const Color(0xFF1A1A1A),
+                                    borderRadius: BorderRadius.circular(12)),
                                 child: const Text('START',
                                     style: TextStyle(
+                                        color: Colors.white,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold)),
                               ),

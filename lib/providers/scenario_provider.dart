@@ -5,7 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models.dart';
 
-final scenarioPacksProvider = StateNotifierProvider<ScenarioPacksNotifier, List<ScenarioPack>>((ref) {
+final scenarioPacksProvider =
+    StateNotifierProvider<ScenarioPacksNotifier, List<ScenarioPack>>((ref) {
   return ScenarioPacksNotifier()..load();
 });
 
@@ -20,8 +21,14 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           title: 'Debt and Borrowing',
           topic: 'Debt and Borrowing',
           modules: [
-            ScenarioModule(id: 'debt_intro', title: 'Understanding Interest', description: 'Learn interest basics'),
-            ScenarioModule(id: 'debt_choices', title: 'Good vs Bad Debt', description: 'Decide when to borrow'),
+            ScenarioModule(
+                id: 'debt_intro',
+                title: 'Understanding Interest',
+                description: 'Learn interest basics'),
+            ScenarioModule(
+                id: 'debt_choices',
+                title: 'Good vs Bad Debt',
+                description: 'Decide when to borrow'),
           ],
         ),
         const ScenarioPack(
@@ -29,8 +36,14 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           title: 'Savings Basics',
           topic: 'Savings Basics',
           modules: [
-            ScenarioModule(id: 'savings_pay_yourself', title: 'Pay Yourself First', description: 'Set aside savings first'),
-            ScenarioModule(id: 'savings_emergency', title: 'Emergency Fund', description: 'Build a cushion'),
+            ScenarioModule(
+                id: 'savings_pay_yourself',
+                title: 'Pay Yourself First',
+                description: 'Set aside savings first'),
+            ScenarioModule(
+                id: 'savings_emergency',
+                title: 'Emergency Fund',
+                description: 'Build a cushion'),
           ],
         ),
         const ScenarioPack(
@@ -38,7 +51,10 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           title: 'Scam Awareness',
           topic: 'Scam Awareness',
           modules: [
-            ScenarioModule(id: 'scam_red_flags', title: 'Spotting Red Flags', description: 'Avoid scams'),
+            ScenarioModule(
+                id: 'scam_red_flags',
+                title: 'Spotting Red Flags',
+                description: 'Avoid scams'),
           ],
         ),
         const ScenarioPack(
@@ -46,7 +62,10 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           title: 'Insurance 101',
           topic: 'Insurance 101',
           modules: [
-            ScenarioModule(id: 'insurance_risk', title: 'Risk Pooling', description: 'How insurance works'),
+            ScenarioModule(
+                id: 'insurance_risk',
+                title: 'Risk Pooling',
+                description: 'How insurance works'),
           ],
         ),
         const ScenarioPack(
@@ -54,7 +73,10 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           title: 'Investment Basics',
           topic: 'Investment Basics',
           modules: [
-            ScenarioModule(id: 'invest_risk_return', title: 'Risk vs Return', description: 'Finding balance'),
+            ScenarioModule(
+                id: 'invest_risk_return',
+                title: 'Risk vs Return',
+                description: 'Finding balance'),
           ],
         ),
         const ScenarioPack(
@@ -62,7 +84,10 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           title: 'Managing Your First Salary',
           topic: 'Managing Your First Salary',
           modules: [
-            ScenarioModule(id: 'salary_budget', title: 'Your First Budget', description: '50/30/20 rule'),
+            ScenarioModule(
+                id: 'salary_budget',
+                title: 'Your First Budget',
+                description: '50/30/20 rule'),
           ],
         ),
         const ScenarioPack(
@@ -70,8 +95,14 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           title: 'Insurance Awareness (Ages 20-25)',
           topic: 'Insurance Awareness',
           modules: [
-            ScenarioModule(id: 'no_insurance_case', title: 'Without Insurance', description: 'Simulate no coverage'),
-            ScenarioModule(id: 'with_insurance_case', title: 'With Insurance', description: 'Compare with coverage'),
+            ScenarioModule(
+                id: 'no_insurance_case',
+                title: 'Without Insurance',
+                description: 'Experience no coverage'),
+            ScenarioModule(
+                id: 'with_insurance_case',
+                title: 'With Insurance',
+                description: 'Compare with coverage'),
           ],
         ),
       ];
@@ -97,7 +128,8 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
               title: pack.title,
               topic: pack.topic,
               modules: pack.modules
-                  .map((m) => m.id == moduleId ? m.copyWith(completed: true) : m)
+                  .map(
+                      (m) => m.id == moduleId ? m.copyWith(completed: true) : m)
                   .toList(),
             ))
         .toList();
@@ -107,6 +139,7 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
 
   Future<void> _persist() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_prefsKey, jsonEncode(state.map((e) => e.toJson()).toList()));
+    await prefs.setString(
+        _prefsKey, jsonEncode(state.map((e) => e.toJson()).toList()));
   }
 }

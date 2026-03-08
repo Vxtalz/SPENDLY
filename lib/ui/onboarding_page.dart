@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'widgets/interactive_widgets.dart';
 
 class OnboardingPage extends StatelessWidget {
   final VoidCallback onFinished;
@@ -20,12 +21,26 @@ class OnboardingPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Spendly',
-                    style: theme.textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  Opacity(
+                    opacity: 0,
+                    child: IgnorePointer(
+                      child: TextButton(
+                        onPressed: null,
+                        child: const Text('Skip'),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Spendly',
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 42,
+                        letterSpacing: -1.5,
+                      ),
+                    ),
                   ),
                   TextButton(
                     onPressed: onFinished,
@@ -39,7 +54,7 @@ class OnboardingPage extends StatelessWidget {
                   children: const [
                     _OnboardingSlide(
                       icon: Icons.flash_on,
-                      title: 'One App. One Habit.',
+                      title: 'Build Better Money Habits, Daily',
                       body: 'Learn it. Track it. Live it. One day at a time.',
                     ),
                     _OnboardingSlide(
@@ -60,16 +75,35 @@ class OnboardingPage extends StatelessWidget {
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
-                child: FilledButton(
-                  onPressed: onFinished,
-                  child: const Text('Get started'),
+                height: 56,
+                child: InteractiveButton(
+                  isPrimary: true,
+                  onTap: onFinished,
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A1A1A),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Text(
+                      'Get started',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Designed for Filipino youth to learn money habits through low-stress practice, not lectures.',
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: Colors.grey[600]),
+              const SizedBox(height: 16),
+              Center(
+                child: Text(
+                  'Designed for Filipino youth to learn money habits through low-stress practice, not lectures.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: Colors.grey[600]),
+                ),
               ),
             ],
           ),
@@ -96,7 +130,7 @@ class _OnboardingSlide extends StatelessWidget {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Center(
           child: Container(
@@ -115,12 +149,14 @@ class _OnboardingSlide extends StatelessWidget {
         const SizedBox(height: 32),
         Text(
           title,
+          textAlign: TextAlign.center,
           style: theme.textTheme.headlineSmall
               ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Text(
           body,
+          textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
         ),
       ],
