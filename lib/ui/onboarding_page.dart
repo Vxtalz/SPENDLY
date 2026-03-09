@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'widgets/interactive_widgets.dart';
 
-class OnboardingPage extends StatelessWidget {
+class OnboardingPage extends StatefulWidget {
   final VoidCallback onFinished;
 
   const OnboardingPage({
@@ -10,156 +12,315 @@ class OnboardingPage extends StatelessWidget {
   });
 
   @override
+  State<OnboardingPage> createState() => _OnboardingPageState();
+}
+
+class _OnboardingPageState extends State<OnboardingPage> {
+  final PageController _pageController = PageController();
+
+  String? _selectedPersonType;
+  String? _selectedFrequency;
+  final TextEditingController _amountController = TextEditingController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  void _nextPage() {
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _prevPage() {
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Future<void> _finishFlow() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_selectedPersonType != null) {
+      await prefs.setString('user_person_type', _selectedPersonType!);
+    }
+    if (_selectedFrequency != null) {
+      await prefs.setString('user_income_frequency', _selectedFrequency!);
+    }
+    if (_amountController.text.isNotEmpty) {
+      final amount = double.tryParse(_amountController.text) ?? 0;
+      await prefs.setDouble('user_income_amount', amount);
+    }
+    widget.onFinished();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(
+          onPressed: () {
+            if (_pageController.page != null && _pageController.page! > 0) {
+              _prevPage();
+            }
+          },
+        ),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(), // Disable swipe
             children: [
-              Row(
-                children: [
-                  Opacity(
-                    opacity: 0,
-                    child: IgnorePointer(
-                      child: TextButton(
-                        onPressed: null,
-                        child: const Text('Skip'),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Spendly',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 42,
-                        letterSpacing: -1.5,
-                      ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: onFinished,
-                    child: const Text('Skip'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              Expanded(
-                child: PageView(
-                  children: const [
-                    _OnboardingSlide(
-                      icon: Icons.flash_on,
-                      title: 'Build Better Money Habits, Daily',
-                      body: 'Learn it. Track it. Live it. One day at a time.',
-                    ),
-                    _OnboardingSlide(
-                      icon: Icons.bar_chart,
-                      title: 'See your patterns clearly',
-                      body:
-                          'Weekly and 30-day reports show how much you actually spend and save.',
-                    ),
-                    _OnboardingSlide(
-                      icon: Icons.star_border,
-                      title: 'Earn badges for good habits',
-                      body:
-                          'Build streaks, hit savings goals, and unlock badges as you grow your money skills.',
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: InteractiveButton(
-                  isPrimary: true,
-                  onTap: onFinished,
-                  child: Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Text(
-                      'Get started',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: Text(
-                  'Designed for Filipino youth to learn money habits through low-stress practice, not lectures.',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: Colors.grey[600]),
-                ),
-              ),
+              _buildScreen1(theme),
+              _buildScreen2(theme),
+              _buildScreen3(theme),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _buildScreen1(ThemeData theme) {
+    final choices = [
+      'Student',
+      'Working',
+      'Freelancer',
+      'Out of School Youth',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Before we start, let me get to know you!',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'What best describes you right now?',
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 32),
+        Expanded(
+          child: ListView.separated(
+            itemCount: choices.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final choice = choices[index];
+              final isSelected = _selectedPersonType == choice;
+              return _SelectionCard(
+                text: choice,
+                isSelected: isSelected,
+                onTap: () {
+                  setState(() {
+                    _selectedPersonType = choice;
+                  });
+                  // Auto advance logic or give a brief delay
+                  Future.delayed(const Duration(milliseconds: 250), () {
+                    if (mounted) _nextPage();
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScreen2(ThemeData theme) {
+    final frequencies = [
+      'Daily',
+      'Weekly',
+      'Monthly',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'How do you usually receive your money?',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 32),
+        Expanded(
+          child: ListView.separated(
+            itemCount: frequencies.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final freq = frequencies[index];
+              final isSelected = _selectedFrequency == freq;
+              return _SelectionCard(
+                text: freq,
+                isSelected: isSelected,
+                onTap: () {
+                  setState(() {
+                    _selectedFrequency = freq;
+                  });
+                  Future.delayed(const Duration(milliseconds: 250), () {
+                    if (mounted) _nextPage();
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScreen3(ThemeData theme) {
+    String subtitle = 'How much do you receive?';
+    if (_selectedFrequency == 'Daily') {
+      subtitle = 'How much is your daily allowance or budget?';
+    } else if (_selectedFrequency == 'Weekly') {
+      subtitle = 'How much do you receive every week?';
+    } else if (_selectedFrequency == 'Monthly') {
+      subtitle = 'How much do you receive every month?';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'How much do you usually receive?',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          subtitle,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 32),
+        TextField(
+          controller: _amountController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+          ],
+          decoration: InputDecoration(
+            prefixText: '₱ ',
+            prefixStyle: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+            hintText: '0.00',
+            filled: true,
+            fillColor: theme.colorScheme.surfaceContainerHighest,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 24,
+              vertical: 20,
+            ),
+          ),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+          onChanged: (val) {
+            setState(() {}); // enable/disable button
+          },
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'This helps us set up your experience. You can update this anytime.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+        const Spacer(),
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: InteractiveButton(
+            isPrimary: _amountController.text.isNotEmpty,
+            onTap: _amountController.text.isNotEmpty ? () { _finishFlow(); } : null,
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: _amountController.text.isNotEmpty
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                "Let's Go!",
+                style: TextStyle(
+                  color: _amountController.text.isNotEmpty
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _OnboardingSlide extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String body;
+class _SelectionCard extends StatelessWidget {
+  final String text;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  const _OnboardingSlide({
-    required this.icon,
-    required this.title,
-    required this.body,
+  const _SelectionCard({
+    required this.text,
+    required this.isSelected,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Center(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Icon(
-              icon,
-              size: 56,
-              color: theme.colorScheme.primary,
-            ),
+    return InteractiveButton(
+      onTap: onTap,
+      isPrimary: isSelected,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary.withValues(alpha: 0.1)
+              : theme.colorScheme.surface,
+          border: Border.all(
+            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(
+          text,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 32),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.headlineSmall
-              ?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          body,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
-        ),
-      ],
+      ),
     );
   }
 }

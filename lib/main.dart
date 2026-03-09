@@ -84,10 +84,9 @@ class _RootGateState extends State<_RootGate> {
       );
     }
 
-    if (!_seenOnboarding) {
-      return OnboardingPage(onFinished: _finishOnboarding);
-    }
-
-    return const AuthGate();
+    return AuthGate(
+      seenOnboarding: _seenOnboarding,
+      onFinishOnboarding: _finishOnboarding,
+    );
   }
 }

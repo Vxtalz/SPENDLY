@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 class InteractiveButton extends StatefulWidget {
   final Widget child;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool isSuccess;
   final bool isError;
   final bool isPrimary;
@@ -114,12 +114,12 @@ class _InteractiveButtonState extends State<InteractiveButton>
             child: Transform.scale(
               scale: _scaleAnimation.value + (_liftAnimation.value * 0.02),
               child: GestureDetector(
-                onTapDown: (_) => _pressController.forward(),
-                onTapUp: (_) {
+                onTapDown: widget.onTap != null ? (_) => _pressController.forward() : null,
+                onTapUp: widget.onTap != null ? (_) {
                   _pressController.reverse();
-                  widget.onTap();
-                },
-                onTapCancel: () => _pressController.reverse(),
+                  widget.onTap?.call();
+                } : null,
+                onTapCancel: widget.onTap != null ? () => _pressController.reverse() : null,
                 child: Stack(
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
