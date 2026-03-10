@@ -6,7 +6,8 @@ import 'package:uuid/uuid.dart';
 
 import '../models.dart';
 
-final receiptListProvider = StateNotifierProvider<ReceiptNotifier, List<ReceiptEntry>>((ref) {
+final receiptListProvider =
+    StateNotifierProvider<ReceiptNotifier, List<ReceiptEntry>>((ref) {
   return ReceiptNotifier()..load();
 });
 
@@ -48,7 +49,8 @@ class ReceiptNotifier extends StateNotifier<List<ReceiptEntry>> {
     );
     final next = [...state, entry];
     state = next;
-    await prefs.setString(_prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
+    await prefs.setString(
+        _prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
     return id;
   }
 
@@ -56,6 +58,7 @@ class ReceiptNotifier extends StateNotifier<List<ReceiptEntry>> {
     final prefs = await SharedPreferences.getInstance();
     final next = state.where((e) => e.id != id).toList();
     state = next;
-    await prefs.setString(_prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
+    await prefs.setString(
+        _prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
   }
 }

@@ -19,9 +19,15 @@ class SimulationNotifier extends StateNotifier<SimulationState> {
   Future<void> load() async {
     // 1. Load from local cache first (Immediate offline support)
     final prefs = await SharedPreferences.getInstance();
+
+    final userPersonType = prefs.getString('user_person_type');
+
     final localRaw = prefs.getString(_prefsKey);
     if (localRaw != null) {
-      state = SimulationState.fromJson(jsonDecode(localRaw));
+      final parsed = SimulationState.fromJson(jsonDecode(localRaw));
+      state = parsed.copyWith(todayType: parsed.todayType ?? userPersonType);
+    } else {
+      state = SimulationState(todayType: userPersonType);
     }
 
     // 2. Try to sync from Supabase if authenticated
@@ -39,7 +45,8 @@ class SimulationNotifier extends StateNotifier<SimulationState> {
           // Simple conflict resolution: Remote wins if we just logged in,
           // or if it's the first time loading.
           // For a true offline app, we'd check 'updated_at' timestamps.
-          state = remoteState;
+          state = remoteState.copyWith(
+              todayType: remoteState.todayType ?? userPersonType);
           await _persistLocal();
         } else {
           // If remote doesn't exist, push local state to remote
@@ -82,6 +89,9 @@ class SimulationNotifier extends StateNotifier<SimulationState> {
         'last_played_date':
             state.lastPlayedDate?.toIso8601String().substring(0, 10) ??
                 todayStr,
+        'today_goal': state.todayGoal,
+        'today_type': state.todayType,
+        'today_allowance': state.todayAllowance,
         'updated_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
@@ -145,6 +155,9 @@ class SimulationNotifier extends StateNotifier<SimulationState> {
       streakDays: newStreak,
       lastPlayedDate: todayDate,
       balance: newBalance,
+      todayGoal: null,
+      todayType: null,
+      todayAllowance: allowance,
     );
 
     await updateState(next);

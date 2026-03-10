@@ -39,10 +39,12 @@ class _ReceiptsPageState extends ConsumerState<ReceiptsPage> {
                 return ListTile(
                   leading: const Icon(Icons.receipt_long_outlined),
                   title: Text(r.merchant),
-                  subtitle: Text('₱${(r.totalCents / 100).toStringAsFixed(2)} • ${r.timestamp.toLocal()}'),
+                  subtitle: Text(
+                      '₱${(r.totalCents / 100).toStringAsFixed(2)} • ${r.timestamp.toLocal()}'),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline),
-                    onPressed: () => ref.read(receiptListProvider.notifier).remove(r.id),
+                    onPressed: () =>
+                        ref.read(receiptListProvider.notifier).remove(r.id),
                   ),
                 );
               },
@@ -55,18 +57,21 @@ class _ReceiptsPageState extends ConsumerState<ReceiptsPage> {
               children: [
                 TextField(
                   controller: _merchantCtrl,
-                  decoration: const InputDecoration(labelText: 'Merchant/Store'),
+                  decoration:
+                      const InputDecoration(labelText: 'Merchant/Store'),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _amountCtrl,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Total Amount (₱)'),
+                  decoration:
+                      const InputDecoration(labelText: 'Total Amount (₱)'),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _noteCtrl,
-                  decoration: const InputDecoration(labelText: 'Note (optional)'),
+                  decoration:
+                      const InputDecoration(labelText: 'Note (optional)'),
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -76,13 +81,17 @@ class _ReceiptsPageState extends ConsumerState<ReceiptsPage> {
                       final merchant = _merchantCtrl.text.trim();
                       final pesos = int.tryParse(_amountCtrl.text.trim());
                       if (merchant.isEmpty || pesos == null || pesos <= 0) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enter valid details')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Enter valid details')));
                         return;
                       }
                       await ref.read(receiptListProvider.notifier).add(
                             merchant: merchant,
                             totalCents: pesos * 100,
-                            note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
+                            note: _noteCtrl.text.trim().isEmpty
+                                ? null
+                                : _noteCtrl.text.trim(),
                           );
                       _merchantCtrl.clear();
                       _amountCtrl.clear();

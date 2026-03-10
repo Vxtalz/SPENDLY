@@ -5,7 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models.dart';
 
-final entitlementProvider = StateNotifierProvider<EntitlementNotifier, EntitlementState?>((ref) {
+final entitlementProvider =
+    StateNotifierProvider<EntitlementNotifier, EntitlementState?>((ref) {
   return EntitlementNotifier()..load();
 });
 
@@ -19,11 +20,13 @@ class EntitlementNotifier extends StateNotifier<EntitlementState?> {
     final raw = prefs.getString(_prefsKey);
     if (raw == null) {
       // Start 30-day trial on first run
-      final s = EntitlementState(trialStartedAt: DateTime.now(), premium: false);
+      final s =
+          EntitlementState(trialStartedAt: DateTime.now(), premium: false);
       state = s;
       await prefs.setString(_prefsKey, jsonEncode(s.toJson()));
     } else {
-      state = EntitlementState.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      state =
+          EntitlementState.fromJson(jsonDecode(raw) as Map<String, dynamic>);
     }
   }
 
@@ -31,7 +34,8 @@ class EntitlementNotifier extends StateNotifier<EntitlementState?> {
     final prefs = await SharedPreferences.getInstance();
     final current = state;
     if (current == null) return;
-    final next = EntitlementState(trialStartedAt: current.trialStartedAt, premium: value);
+    final next = EntitlementState(
+        trialStartedAt: current.trialStartedAt, premium: value);
     state = next;
     await prefs.setString(_prefsKey, jsonEncode(next.toJson()));
   }

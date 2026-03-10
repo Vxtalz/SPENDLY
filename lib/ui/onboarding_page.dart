@@ -257,7 +257,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
           height: 56,
           child: InteractiveButton(
             isPrimary: _amountController.text.isNotEmpty,
-            onTap: _amountController.text.isNotEmpty ? () { _finishFlow(); } : null,
+            onTap: _amountController.text.isNotEmpty
+                ? () {
+                    _finishFlow();
+                  }
+                : null,
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
@@ -308,7 +312,9 @@ class _SelectionCard extends StatelessWidget {
               ? theme.colorScheme.primary.withValues(alpha: 0.1)
               : theme.colorScheme.surface,
           border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurface.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(16),
@@ -317,7 +323,9 @@ class _SelectionCard extends StatelessWidget {
           text,
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurface,
           ),
         ),
       ),

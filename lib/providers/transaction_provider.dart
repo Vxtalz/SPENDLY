@@ -6,7 +6,8 @@ import 'package:uuid/uuid.dart';
 
 import '../models.dart';
 
-final transactionListProvider = StateNotifierProvider<TransactionNotifier, List<TransactionEntry>>((ref) {
+final transactionListProvider =
+    StateNotifierProvider<TransactionNotifier, List<TransactionEntry>>((ref) {
   return TransactionNotifier()..load();
 });
 
@@ -47,14 +48,16 @@ class TransactionNotifier extends StateNotifier<List<TransactionEntry>> {
     );
     final next = [...state, entry];
     state = next;
-    await prefs.setString(_prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
+    await prefs.setString(
+        _prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
   }
 
   Future<void> remove(String id) async {
     final prefs = await SharedPreferences.getInstance();
     final next = state.where((e) => e.id != id).toList();
     state = next;
-    await prefs.setString(_prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
+    await prefs.setString(
+        _prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
   }
 
   int totalBetween(DateTime from, DateTime to) {

@@ -26,7 +26,8 @@ class GoalNotifier extends StateNotifier<SpendGoal?> {
 
   Future<void> setGoal(GoalPeriod period, int amountCents) async {
     final prefs = await SharedPreferences.getInstance();
-    final g = SpendGoal(period: period, amountCents: amountCents, startAt: DateTime.now());
+    final g = SpendGoal(
+        period: period, amountCents: amountCents, startAt: DateTime.now());
     state = g;
     await prefs.setString(_prefsKey, jsonEncode(g.toJson()));
   }

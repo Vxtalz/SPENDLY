@@ -86,6 +86,9 @@ class SimulationState {
   final int cycleNumber;
   final int streakDays;
   final DateTime? lastPlayedDate;
+  final String? todayGoal;
+  final String? todayType;
+  final double todayAllowance;
 
   const SimulationState({
     this.balance = 300.0,
@@ -95,6 +98,9 @@ class SimulationState {
     this.cycleNumber = 1,
     this.streakDays = 0,
     this.lastPlayedDate,
+    this.todayGoal,
+    this.todayType,
+    this.todayAllowance = 300.0,
   });
 
   SimulationState copyWith({
@@ -105,6 +111,9 @@ class SimulationState {
     int? cycleNumber,
     int? streakDays,
     DateTime? lastPlayedDate,
+    String? todayGoal,
+    String? todayType,
+    double? todayAllowance,
   }) {
     return SimulationState(
       balance: balance ?? this.balance,
@@ -114,6 +123,9 @@ class SimulationState {
       cycleNumber: cycleNumber ?? this.cycleNumber,
       streakDays: streakDays ?? this.streakDays,
       lastPlayedDate: lastPlayedDate ?? this.lastPlayedDate,
+      todayGoal: todayGoal ?? this.todayGoal,
+      todayType: todayType ?? this.todayType,
+      todayAllowance: todayAllowance ?? this.todayAllowance,
     );
   }
 
@@ -125,6 +137,9 @@ class SimulationState {
         'cycle_number': cycleNumber,
         'streak_days': streakDays,
         'last_played_date': lastPlayedDate?.toIso8601String().substring(0, 10),
+        'today_goal': todayGoal,
+        'today_type': todayType,
+        'today_allowance': todayAllowance,
       };
 
   factory SimulationState.fromJson(Map<String, dynamic> json) =>
@@ -138,6 +153,9 @@ class SimulationState {
         lastPlayedDate: json['last_played_date'] != null
             ? DateTime.parse(json['last_played_date'] as String)
             : null,
+        todayGoal: json['today_goal'] as String?,
+        todayType: json['today_type'] as String?,
+        todayAllowance: (json['today_allowance'] as num?)?.toDouble() ?? 300.0,
       );
 }
 
