@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/simulation_provider.dart';
 
-class GoalsPage extends StatefulWidget {
+class GoalsPage extends ConsumerStatefulWidget {
   const GoalsPage({super.key});
 
   @override
-  State<GoalsPage> createState() => _GoalsPageState();
+  ConsumerState<GoalsPage> createState() => _GoalsPageState();
 }
 
-class _GoalsPageState extends State<GoalsPage> {
+class _GoalsPageState extends ConsumerState<GoalsPage> {
   bool _loading = true;
   List<Map<String, dynamic>> _goals = [];
 
@@ -20,12 +22,6 @@ class _GoalsPageState extends State<GoalsPage> {
 
   Future<void> _loadGoals() async {
     setState(() => _loading = true);
-    // The instruction snippet was incomplete and would cause syntax errors.
-    // Assuming the intent was to add new variables while keeping the existing database logic.
-    // If `ref` and `simulationProvider` are not defined, this will cause an error.
-    // For now, I'm commenting them out to maintain syntactic correctness of the original file.
-    // final simState = ref.watch(simulationProvider);
-    // final daysLeft = 30 - simState.currentDay + 1;
     final client = Supabase.instance.client;
     final userId = client.auth.currentUser!.id;
     final data = await client
@@ -108,20 +104,47 @@ class _GoalsPageState extends State<GoalsPage> {
     await _loadGoals();
   }
 
+  Future<void> _deleteGoal(String goalId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Goal?'),
+        content: const Text(
+            'Are you sure you want to remove this goal? This cannot be undone.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final client = Supabase.instance.client;
+      await client.from('goals').delete().eq('id', goalId);
+      await _loadGoals();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final simState = ref.watch(simulationProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(color: Color(0xFF58CC02)),
       );
     }
 
-    double totalSaved = 0;
+    double totalSaved = simState.savings;
     double totalTarget = 0;
     for (final g in _goals) {
       totalTarget += (g['target_amount'] as num).toDouble();
-      totalSaved += (g['current_amount'] as num?)?.toDouble() ?? 0;
     }
     if (totalTarget == 0) totalTarget = 1;
     final totalProgress = (totalSaved / totalTarget).clamp(0.0, 1.0);
@@ -224,10 +247,11 @@ class _GoalsPageState extends State<GoalsPage> {
               else
                 ...List.generate(_goals.length, (index) {
                   final goal = _goals[index];
+                  final id = goal['id'].toString();
                   final name = goal['name'] as String;
                   final target = (goal['target_amount'] as num).toDouble();
-                  final current =
-                      (goal['current_amount'] as num?)?.toDouble() ?? 0;
+                  // Sync each card with the total simulation savings
+                  final current = simState.savings;
                   final progress =
                       (target == 0) ? 0.0 : (current / target).clamp(0.0, 1.0);
                   final percent = (progress * 100).round();
@@ -269,14 +293,21 @@ class _GoalsPageState extends State<GoalsPage> {
                                 child: Icon(Icons.star_rounded, color: color),
                               ),
                               const SizedBox(width: 12),
-                              Text(
-                                name,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
                                 ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline,
+                                    color: Colors.grey),
+                                onPressed: () => _deleteGoal(id),
                               ),
                             ],
                           ),

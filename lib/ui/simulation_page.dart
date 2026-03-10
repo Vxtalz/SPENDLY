@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models.dart';
 import '../providers/simulation_provider.dart';
+import '../providers/transaction_provider.dart';
 import 'widgets/interactive_widgets.dart';
 
 class SimulationPage extends ConsumerStatefulWidget {
@@ -352,16 +353,31 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
     });
 
     final notifier = ref.read(simulationProvider.notifier);
+    final txNotifier = ref.read(transactionListProvider.notifier);
+    final amountCents = (amount * 100).toInt();
+
     if (isSaving) {
       await notifier.logSaving(amount);
+      // Log as real income/savings in the transaction list
+      await txNotifier.add(
+        amountCents: amountCents,
+        category: 'Savings',
+        note: 'Saved from $label',
+      );
     } else {
       await notifier.logExpense(amount);
+      // Log as real expense in the transaction list
+      await txNotifier.add(
+        amountCents: -amountCents,
+        category: 'Expense',
+        note: 'Spent on $label',
+      );
     }
 
-    final client = Supabase.instance.client;
     final userId = _userId;
     if (userId != null) {
       try {
+        final client = Supabase.instance.client;
         await client.from('transactions').insert({
           'user_id': userId,
           'amount': isSaving ? amount : -amount,
@@ -374,53 +390,50 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
   }
 
   Future<Map<String, dynamic>> _computeWeeklySummary() async {
-    final client = Supabase.instance.client;
-    if (_userId == null) return {'spent': 0.0, 'saved': 0.0};
-    final fromDate = DateTime.now().subtract(const Duration(days: 7));
-    try {
-      final data = await client
-          .from('transactions')
-          .select()
-          .eq('user_id', _userId!)
-          .gte('created_at', fromDate.toIso8601String());
-      double spent = 0;
-      double saved = 0;
-      for (final tx in data) {
-        final amount = (tx['amount'] as num).toDouble();
-        if (tx['type'] == 'expense') spent += -amount;
-        if (tx['type'] == 'saving') saved += amount;
+    final txs = ref.read(transactionListProvider);
+    final now = DateTime.now();
+    final fromDate = now.subtract(const Duration(days: 7));
+
+    double spent = 0;
+    double saved = 0;
+
+    for (final tx in txs) {
+      if (!tx.timestamp.isBefore(fromDate)) {
+        final amount = tx.amountCents.toDouble() / 100.0;
+        if (amount < 0) {
+          spent += -amount;
+        } else {
+          // In simulation, positive entries are savings/income
+          saved += amount;
+        }
       }
-      return {'spent': spent, 'saved': saved};
-    } catch (_) {
-      return {'spent': 0.0, 'saved': 0.0};
     }
+    return {'spent': spent, 'saved': saved};
   }
 
   Future<Map<String, dynamic>> _computeCycleSummary() async {
-    final client = Supabase.instance.client;
-    if (_userId == null) return {'spent': 0.0, 'saved': 0.0, 'debt': 0.0};
-    final fromDate = DateTime.now().subtract(const Duration(days: 30));
-    try {
-      final txs = await client
-          .from('transactions')
-          .select()
-          .eq('user_id', _userId!)
-          .gte('created_at', fromDate.toIso8601String());
-      double spent = 0;
-      double saved = 0;
-      for (final tx in txs) {
-        final amount = (tx['amount'] as num).toDouble();
-        if (tx['type'] == 'expense') spent += -amount;
-        if (tx['type'] == 'saving') saved += amount;
+    final txs = ref.read(transactionListProvider);
+    final now = DateTime.now();
+    final fromDate = now.subtract(const Duration(days: 30));
+
+    double spent = 0;
+    double saved = 0;
+
+    for (final tx in txs) {
+      if (!tx.timestamp.isBefore(fromDate)) {
+        final amount = tx.amountCents.toDouble() / 100.0;
+        if (amount < 0) {
+          spent += -amount;
+        } else {
+          saved += amount;
+        }
       }
-      return {
-        'spent': spent,
-        'saved': saved,
-        'debt': ref.read(simulationProvider).debt
-      };
-    } catch (_) {
-      return {'spent': 0.0, 'saved': 0.0, 'debt': 0.0};
     }
+    return {
+      'spent': spent,
+      'saved': saved,
+      'debt': ref.read(simulationProvider).debt
+    };
   }
 
   Future<void> _awardBadge(String key, String label) async {
@@ -487,6 +500,10 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
   }
 
   Future<void> _nextDay() async {
+    // 1. Shift all transactions back by 24 hours.
+    // This moves 'Today' items to 'Yesterday', resetting today's income/expense totals to 0.
+    await ref.read(transactionListProvider.notifier).shiftAwayToday();
+
     final oldState = ref.read(simulationProvider);
     await ref.read(simulationProvider.notifier).nextDay();
     final newState = ref.read(simulationProvider);
@@ -585,6 +602,25 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
   @override
   Widget build(BuildContext context) {
     final simState = ref.watch(simulationProvider);
+    final txs = ref.watch(transactionListProvider);
+
+    // Sync budget with TODAY's income (Incoming money)
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final double incomeToday = txs
+        .where((t) =>
+            t.timestamp.isAfter(startOfDay) &&
+            t.timestamp.isBefore(endOfDay) &&
+            t.amountCents > 0)
+        .fold(0.0, (sum, t) => sum + (t.amountCents / 100.0));
+
+    // Avoid loops - only sync if it changed
+    if (simState.todayAllowance != incomeToday) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(simulationProvider.notifier).syncTodayAllowance(incomeToday);
+      });
+    }
 
     if (simState.todayGoal == null) {
       return _buildGoalSelection(simState);

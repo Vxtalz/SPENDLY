@@ -186,7 +186,7 @@ class _BadgesPageState extends State<BadgesPage> {
             crossAxisCount: 3,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 0.82,
+            childAspectRatio: 0.65,
             children: _allBadges.map((b) {
               final key = b.$1;
               final name = b.$2;
@@ -206,12 +206,13 @@ class _BadgesPageState extends State<BadgesPage> {
                 child: Opacity(
                   opacity: unlocked ? 1.0 : 0.5,
                   child: Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(emoji, style: const TextStyle(fontSize: 32)),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 4),
                         Text(
                           name,
                           textAlign: TextAlign.center,
@@ -219,20 +220,20 @@ class _BadgesPageState extends State<BadgesPage> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 11,
+                            fontSize: 10,
                             color: unlocked ? _darkNavy : Colors.grey.shade600,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
                           desc,
                           textAlign: TextAlign.center,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 9,
+                            fontSize: 8.5,
                             color: Colors.grey.shade600,
-                            height: 1.2,
+                            height: 1.1,
                           ),
                         ),
                       ],

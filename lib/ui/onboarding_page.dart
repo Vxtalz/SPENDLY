@@ -119,7 +119,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         Expanded(
           child: ListView.separated(
             itemCount: choices.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            separatorBuilder: (context, index) => const SizedBox(height: 14),
             itemBuilder: (context, index) {
               final choice = choices[index];
               final isSelected = _selectedPersonType == choice;
@@ -163,7 +163,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         Expanded(
           child: ListView.separated(
             itemCount: frequencies.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            separatorBuilder: (context, index) => const SizedBox(height: 14),
             itemBuilder: (context, index) {
               final freq = frequencies[index];
               final isSelected = _selectedFrequency == freq;
@@ -306,7 +306,9 @@ class _SelectionCard extends StatelessWidget {
       onTap: onTap,
       isPrimary: isSelected,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        width: double.infinity,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 26),
         decoration: BoxDecoration(
           color: isSelected
               ? theme.colorScheme.primary.withValues(alpha: 0.1)
@@ -322,10 +324,11 @@ class _SelectionCard extends StatelessWidget {
         child: Text(
           text,
           style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
             color: isSelected
                 ? theme.colorScheme.primary
                 : theme.colorScheme.onSurface,
+            fontSize: 18,
           ),
         ),
       ),

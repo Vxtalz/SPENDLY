@@ -91,7 +91,7 @@ class SimulationState {
   final double todayAllowance;
 
   const SimulationState({
-    this.balance = 300.0,
+    this.balance = 0.0,
     this.savings = 0.0,
     this.debt = 0.0,
     this.currentDay = 1,
@@ -100,7 +100,7 @@ class SimulationState {
     this.lastPlayedDate,
     this.todayGoal,
     this.todayType,
-    this.todayAllowance = 300.0,
+    this.todayAllowance = 0.0,
   });
 
   SimulationState copyWith({
@@ -144,7 +144,7 @@ class SimulationState {
 
   factory SimulationState.fromJson(Map<String, dynamic> json) =>
       SimulationState(
-        balance: (json['balance'] as num?)?.toDouble() ?? 300.0,
+        balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
         savings: (json['savings'] as num?)?.toDouble() ?? 0.0,
         debt: (json['debt'] as num?)?.toDouble() ?? 0.0,
         currentDay: json['current_day'] as int? ?? 1,
@@ -155,7 +155,7 @@ class SimulationState {
             : null,
         todayGoal: json['today_goal'] as String?,
         todayType: json['today_type'] as String?,
-        todayAllowance: (json['today_allowance'] as num?)?.toDouble() ?? 300.0,
+        todayAllowance: (json['today_allowance'] as num?)?.toDouble() ?? 0.0,
       );
 }
 
@@ -176,6 +176,24 @@ class TransactionEntry {
     this.note,
     this.receiptId,
   });
+
+  TransactionEntry copyWith({
+    String? id,
+    int? amountCents,
+    String? category,
+    DateTime? timestamp,
+    String? note,
+    String? receiptId,
+  }) {
+    return TransactionEntry(
+      id: id ?? this.id,
+      amountCents: amountCents ?? this.amountCents,
+      category: category ?? this.category,
+      timestamp: timestamp ?? this.timestamp,
+      note: note ?? this.note,
+      receiptId: receiptId ?? this.receiptId,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,

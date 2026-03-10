@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'widgets/interactive_widgets.dart';
 
 import '../models.dart';
 import '../providers/transaction_provider.dart';
 import '../providers/goal_provider.dart';
+import '../providers/simulation_provider.dart';
 
 class TransactionsPage extends ConsumerStatefulWidget {
   const TransactionsPage({super.key});
@@ -18,6 +20,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   final _amountCtrl = TextEditingController();
   final _categoryCtrl = TextEditingController(text: 'Food');
   final _noteCtrl = TextEditingController();
+  bool _isExpense = true;
 
   static const _primaryGreen = Color(0xFF22C55E);
 
@@ -44,15 +47,15 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     int totalIncome = 0;
     int totalExpense = 0;
     for (final t in txs) {
-      if (t.amountCents > 0) {
-        totalIncome += t.amountCents;
-      } else {
-        totalExpense += -t.amountCents;
+      if (!t.timestamp.isBefore(startOfDay) && t.timestamp.isBefore(endOfDay)) {
+        if (t.amountCents > 0) {
+          totalIncome += t.amountCents;
+        } else {
+          totalExpense += -t.amountCents;
+        }
       }
     }
-    // Include "Extra from Tita" sample in displayed income for summary
-    const sampleIncomingCents = 50000; // ₱500
-    final displayIncome = totalIncome + sampleIncomingCents;
+    final displayIncome = totalIncome;
 
     final byDate = <DateTime, List<TransactionEntry>>{};
     for (final t in txs) {
@@ -220,26 +223,18 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               _buildDateSection(
                 context,
                 startOfDay,
-                [
-                  _TransactionItem(
-                    id: 'sample_tita',
-                    category: 'From Tita',
-                    note: 'Extra from Tita',
-                    amountCents: 50000,
-                    timestamp: DateTime.now(),
-                    isSample: true,
-                  ),
-                  ...(byDate[startOfDay] ?? []).map(
-                    (t) => _TransactionItem(
-                      id: t.id,
-                      category: t.category,
-                      note: t.note,
-                      amountCents: t.amountCents,
-                      timestamp: t.timestamp,
-                      isSample: false,
-                    ),
-                  ),
-                ],
+                (byDate[startOfDay] ?? [])
+                    .map(
+                      (t) => _TransactionItem(
+                        id: t.id,
+                        category: t.category,
+                        note: t.note,
+                        amountCents: t.amountCents,
+                        timestamp: t.timestamp,
+                        isSample: false,
+                      ),
+                    )
+                    .toList(),
               ),
               ...sortedDates.where((d) => d != startOfDay).map(
                     (d) => _buildDateSection(
@@ -274,6 +269,39 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
           child: Column(
             children: [
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment(
+                    value: false,
+                    label: Text('Income'),
+                    icon: Icon(Icons.arrow_downward_rounded),
+                  ),
+                  ButtonSegment(
+                    value: true,
+                    label: Text('Expense'),
+                    icon: Icon(Icons.arrow_upward_rounded),
+                  ),
+                ],
+                selected: {_isExpense},
+                onSelectionChanged: (val) {
+                  setState(() {
+                    _isExpense = val.first;
+                    if (_isExpense && _categoryCtrl.text == 'Income') {
+                      _categoryCtrl.text = 'Food';
+                    } else if (!_isExpense && _categoryCtrl.text == 'Food') {
+                      _categoryCtrl.text = 'Income';
+                    }
+                  });
+                },
+                style: SegmentedButton.styleFrom(
+                  selectedBackgroundColor: _isExpense
+                      ? Colors.red.withValues(alpha: 0.1)
+                      : _primaryGreen.withValues(alpha: 0.1),
+                  selectedForegroundColor:
+                      _isExpense ? Colors.red : _primaryGreen,
+                ),
+              ),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -313,22 +341,65 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     );
                     return;
                   }
-                  await ref.read(transactionListProvider.notifier).add(
-                        amountCents: pesos * 100,
-                        category: _categoryCtrl.text.trim().isEmpty
-                            ? 'Other'
-                            : _categoryCtrl.text.trim(),
-                        note: _noteCtrl.text.trim().isEmpty
-                            ? null
-                            : _noteCtrl.text.trim(),
-                      );
-                  await ref
-                      .read(goalProvider.notifier)
-                      .addSpending(pesos * 100);
+
+                  final amountCents =
+                      _isExpense ? -(pesos * 100) : (pesos * 100);
+
+                  final simNotifier = ref.read(simulationProvider.notifier);
+                  final txNotifier = ref.read(transactionListProvider.notifier);
+
+                  if (_isExpense) {
+                    await simNotifier.logExpense(pesos.toDouble());
+                  } else {
+                    final curr = ref.read(simulationProvider);
+                    await simNotifier.updateState(curr.copyWith(
+                      balance: curr.balance + pesos,
+                    ));
+                  }
+
+                  await txNotifier.add(
+                    amountCents: amountCents,
+                    category: _categoryCtrl.text.trim().isEmpty
+                        ? 'Other'
+                        : _categoryCtrl.text.trim(),
+                    note: _noteCtrl.text.trim().isEmpty
+                        ? null
+                        : _noteCtrl.text.trim(),
+                  );
+
+                  // If it's income, let's treat it as progress towards our goal
+                  if (!_isExpense) {
+                    final client = Supabase.instance.client;
+                    final user = client.auth.currentUser;
+                    if (user != null) {
+                      try {
+                        // Find the first active goal and add to it
+                        final goals = await client
+                            .from('goals')
+                            .select()
+                            .eq('user_id', user.id)
+                            .order('created_at', ascending: true)
+                            .limit(1);
+
+                        if (goals.isNotEmpty) {
+                          final goalId = goals[0]['id'];
+                          final currentAmount =
+                              (goals[0]['current_amount'] as num?)
+                                      ?.toDouble() ??
+                                  0;
+                          await client.from('goals').update({
+                            'current_amount': currentAmount + pesos,
+                          }).eq('id', goalId);
+                        }
+                      } catch (e) {
+                        debugPrint("Goal update error: $e");
+                      }
+                    }
+                  }
+
                   _amountCtrl.clear();
                   _noteCtrl.clear();
 
-                  // Pulse of success
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Transaction saved!')),

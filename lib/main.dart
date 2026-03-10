@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'env.dart';
 import 'ui/auth_gate.dart';
-import 'ui/onboarding_page.dart';
 import 'ui/theme.dart';
 import 'providers/theme_provider.dart';
 

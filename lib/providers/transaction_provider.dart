@@ -60,6 +60,18 @@ class TransactionNotifier extends StateNotifier<List<TransactionEntry>> {
         _prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
   }
 
+  Future<void> shiftAwayToday() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Shift all transactions back by 24 hours
+    final next = state.map((e) {
+      return e.copyWith(
+          timestamp: e.timestamp.subtract(const Duration(days: 1)));
+    }).toList();
+    state = next;
+    await prefs.setString(
+        _prefsKey, jsonEncode(next.map((e) => e.toJson()).toList()));
+  }
+
   int totalBetween(DateTime from, DateTime to) {
     return state
         .where((e) => !e.timestamp.isBefore(from) && e.timestamp.isBefore(to))

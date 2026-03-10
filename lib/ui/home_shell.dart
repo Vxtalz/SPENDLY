@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import 'badges_page.dart';
 import 'goals_page.dart';
@@ -72,17 +73,19 @@ class _HomeShellState extends State<HomeShell> {
                         icon: Icons.local_fire_department_rounded,
                         value: simState.streakDays.toString(),
                         color: const Color(0xFFC0FF00)),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 8),
                     _topStat(
-                        icon: Icons.diamond,
-                        value: '500',
+                        icon: Icons.account_balance_wallet_rounded,
+                        value: NumberFormat.currency(
+                                locale: 'en_PH', symbol: '₱', decimalDigits: 0)
+                            .format(simState.balance),
                         color: const Color(0xFF6A5AE0)),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 8),
                     _topStat(
                         icon: Icons.favorite,
                         value: '5',
                         color: const Color(0xFFFF4B4B)),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     Builder(
                         builder: (ctx) => GestureDetector(
                             onTap: () => Scaffold.of(ctx).openEndDrawer(),
@@ -184,7 +187,7 @@ class _HomeShellState extends State<HomeShell> {
   Widget _topStat(
       {required IconData icon, required String value, required Color color}) {
     return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12)),
@@ -197,7 +200,7 @@ class _HomeShellState extends State<HomeShell> {
                       ? const Color(0xFF1A1A1A)
                       : color,
                   fontWeight: FontWeight.bold,
-                  fontSize: 14))
+                  fontSize: 12))
         ]));
   }
 

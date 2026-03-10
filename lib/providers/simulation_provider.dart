@@ -91,13 +91,19 @@ class SimulationNotifier extends StateNotifier<SimulationState> {
                 todayStr,
         'today_goal': state.todayGoal,
         'today_type': state.todayType,
-        'today_allowance': state.todayAllowance,
+        // Removed 'today_allowance' to fix PostgrestException PGRST204
         'updated_at': DateTime.now().toIso8601String(),
       });
     } catch (e) {
       // Silently fail if offline. The local state is already persisted.
       debugPrint("Simulation sync: deferred (offline). $e");
     }
+  }
+
+  // Sync with incoming money from Transactions
+  Future<void> syncTodayAllowance(double income) async {
+    if (state.todayAllowance == income) return;
+    await updateState(state.copyWith(todayAllowance: income));
   }
 
   // Utility methods moved from UI to Provider
@@ -118,17 +124,7 @@ class SimulationNotifier extends StateNotifier<SimulationState> {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
 
-    int newStreak = state.streakDays;
-    if (state.lastPlayedDate == null) {
-      newStreak = 1;
-    } else {
-      final diff = todayDate.difference(state.lastPlayedDate!).inDays;
-      if (diff == 1) {
-        newStreak += 1;
-      } else if (diff > 1) {
-        newStreak = 1;
-      }
-    }
+    int newStreak = state.streakDays + 1;
 
     int nextDay = state.currentDay + 1;
     int nextCycle = state.cycleNumber;
@@ -137,12 +133,7 @@ class SimulationNotifier extends StateNotifier<SimulationState> {
       nextCycle += 1;
     }
 
-    double allowance = 300.0;
-    if (newStreak >= 10) {
-      allowance *= 1.2;
-    } else if (newStreak >= 5) {
-      allowance *= 1.1;
-    }
+    double allowance = 0.0;
 
     double newBalance = state.balance + allowance;
     if (nextDay == 1 && state.debt > 0) {
