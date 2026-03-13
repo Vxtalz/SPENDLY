@@ -105,14 +105,14 @@ class _InteractiveButtonState extends State<InteractiveButton>
           }
 
           // Lift on hover, sink on press
-          final liftValue = _liftAnimation.value * 4.0;
+          final liftValue = _liftAnimation.value * 1.0;
           final pressValue = _pressController.value * 4.0;
           final totalOffset = -liftValue + pressValue;
 
           return Transform.translate(
             offset: Offset(shakeOffset, totalOffset),
             child: Transform.scale(
-              scale: _scaleAnimation.value + (_liftAnimation.value * 0.02),
+              scale: _scaleAnimation.value + (_liftAnimation.value * 0.005),
               child: GestureDetector(
                 onTapDown: widget.onTap != null
                     ? (_) => _pressController.forward()
@@ -150,16 +150,16 @@ class _InteractiveButtonState extends State<InteractiveButton>
                           BoxShadow(
                             color: Colors.black.withValues(
                                 alpha: 0.1 +
-                                    (_liftAnimation.value * 0.05) -
+                                    (_liftAnimation.value * 0.02) -
                                     (_pressController.value * 0.05)),
                             blurRadius: 12 +
                                 (widget.isPrimary ? 8 : 0) +
-                                (_liftAnimation.value * 8) -
+                                (_liftAnimation.value * 3) -
                                 (_pressController.value * 8),
                             offset: Offset(
                                 0,
                                 6 +
-                                    (_liftAnimation.value * 4) -
+                                    (_liftAnimation.value * 2) -
                                     (_pressController.value * 4)),
                             spreadRadius: widget.isPrimary ? 1 : 0,
                           ),

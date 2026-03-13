@@ -138,16 +138,16 @@ class _BadgesPageState extends State<BadgesPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.emoji_events_outlined,
                       color: Color(0xFFFDE047),
                       size: 64,
                     ),
-                    const SizedBox(width: 20),
-                    const Text(
+                    SizedBox(width: 20),
+                    Text(
                       '72',
                       style: TextStyle(
                         color: Color(0xFFFDE047),

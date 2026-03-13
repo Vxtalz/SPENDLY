@@ -48,10 +48,12 @@ class HistoryPage extends ConsumerWidget {
                   DateTime(createdAt.year, createdAt.month, createdAt.day);
               final yesterday = today.subtract(const Duration(days: 1));
 
-              if (itemDate == today)
+              if (itemDate == today) {
                 return "Today, ${DateFormat.jm().format(createdAt.toLocal())}";
-              if (itemDate == yesterday)
+              }
+              if (itemDate == yesterday) {
                 return "Yesterday, ${DateFormat.jm().format(createdAt.toLocal())}";
+              }
               return DateFormat.yMMMd().add_jm().format(createdAt.toLocal());
             }()),
             trailing: Text(

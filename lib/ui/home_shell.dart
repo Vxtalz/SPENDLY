@@ -251,6 +251,18 @@ class _HomeTabBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final packs = ref.watch(scenarioPacksProvider);
 
+    int totalModules = 0;
+    int completedModules = 0;
+    for (final pack in packs) {
+      totalModules += pack.modules.length;
+      for (final module in pack.modules) {
+        if (module.completed) {
+          completedModules++;
+        }
+      }
+    }
+    final progress = totalModules > 0 ? completedModules / totalModules : 0.0;
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -292,11 +304,11 @@ class _HomeTabBody extends ConsumerWidget {
                 const SizedBox(height: 20),
                 ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: const LinearProgressIndicator(
-                        value: 0.4,
+                    child: LinearProgressIndicator(
+                        value: progress,
                         backgroundColor: Colors.white24,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Color(0xFFC0FF00)),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                            Color(0xFFC0FF00)),
                         minHeight: 8)),
               ],
             ),

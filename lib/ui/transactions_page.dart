@@ -16,11 +16,13 @@ class TransactionsPage extends ConsumerStatefulWidget {
   ConsumerState<TransactionsPage> createState() => _TransactionsPageState();
 }
 
+enum _TxType { income, expense, save }
+
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   final _amountCtrl = TextEditingController();
-  final _categoryCtrl = TextEditingController(text: 'Food');
+  final _categoryCtrl = TextEditingController(text: 'Income');
   final _noteCtrl = TextEditingController();
-  bool _isExpense = true;
+  _TxType _selectedType = _TxType.income;
 
   static const _primaryGreen = Color(0xFF22C55E);
 
@@ -44,18 +46,23 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         .read(transactionListProvider.notifier)
         .totalBetween(startOfDay, endOfDay);
 
-    int totalIncome = 0;
+    int totalIncomeActual = 0;
+    int totalSaved = 0;
     int totalExpense = 0;
     for (final t in txs) {
       if (!t.timestamp.isBefore(startOfDay) && t.timestamp.isBefore(endOfDay)) {
         if (t.amountCents > 0) {
-          totalIncome += t.amountCents;
+          if (t.category.toLowerCase() == 'savings') {
+            totalSaved += t.amountCents;
+          } else {
+            totalIncomeActual += t.amountCents;
+          }
         } else {
           totalExpense += -t.amountCents;
         }
       }
     }
-    final displayIncome = totalIncome;
+    final displayIncome = totalIncomeActual;
 
     final byDate = <DateTime, List<TransactionEntry>>{};
     for (final t in txs) {
@@ -89,32 +96,36 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         side: BorderSide(color: dividerColor),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
                                 const Icon(Icons.arrow_downward_rounded,
-                                    color: _primaryGreen, size: 20),
-                                const SizedBox(width: 6),
+                                    color: _primaryGreen, size: 16),
+                                const SizedBox(width: 4),
                                 Text(
                                   'Incoming',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 10,
                                     color: onSurface.withValues(alpha: 0.6),
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(
-                              '₱${(displayIncome / 100).toStringAsFixed(0)}',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: _primaryGreen,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '₱${(displayIncome / 100).toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: _primaryGreen,
+                                ),
                               ),
                             ),
                           ],
@@ -122,7 +133,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Card(
                       elevation: 0,
@@ -131,32 +142,82 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         side: BorderSide(color: dividerColor),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(Icons.savings_outlined,
+                                    color: Color(0xFFC0FF00), size: 16),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Saved',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.white60,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '₱${(totalSaved / 100).toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFC0FF00),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(color: dividerColor),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
                                 Icon(Icons.arrow_upward_rounded,
-                                    color: Colors.red.shade400, size: 20),
-                                const SizedBox(width: 6),
+                                    color: Colors.red.shade400, size: 16),
+                                const SizedBox(width: 4),
                                 Text(
                                   'Expenses',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 10,
                                     color: onSurface.withValues(alpha: 0.6),
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text(
-                              '₱${(totalExpense / 100).toStringAsFixed(0)}',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red.shade400,
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                '₱${(totalExpense / 100).toStringAsFixed(0)}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red.shade400,
+                                ),
                               ),
                             ),
                           ],
@@ -269,36 +330,50 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
           child: Column(
             children: [
-              SegmentedButton<bool>(
+              SegmentedButton<_TxType>(
                 segments: const [
                   ButtonSegment(
-                    value: false,
+                    value: _TxType.income,
                     label: Text('Income'),
                     icon: Icon(Icons.arrow_downward_rounded),
                   ),
                   ButtonSegment(
-                    value: true,
+                    value: _TxType.save,
+                    label: Text('Save'),
+                    icon: Icon(Icons.savings_outlined),
+                  ),
+                  ButtonSegment(
+                    value: _TxType.expense,
                     label: Text('Expense'),
                     icon: Icon(Icons.arrow_upward_rounded),
                   ),
                 ],
-                selected: {_isExpense},
+                selected: {_selectedType},
                 onSelectionChanged: (val) {
                   setState(() {
-                    _isExpense = val.first;
-                    if (_isExpense && _categoryCtrl.text == 'Income') {
+                    _selectedType = val.first;
+                    if (_selectedType == _TxType.expense &&
+                        _categoryCtrl.text == 'Income') {
                       _categoryCtrl.text = 'Food';
-                    } else if (!_isExpense && _categoryCtrl.text == 'Food') {
+                    } else if (_selectedType == _TxType.income &&
+                        _categoryCtrl.text == 'Food') {
                       _categoryCtrl.text = 'Income';
+                    } else if (_selectedType == _TxType.save) {
+                      _categoryCtrl.text = 'Savings';
                     }
                   });
                 },
                 style: SegmentedButton.styleFrom(
-                  selectedBackgroundColor: _isExpense
+                  selectedBackgroundColor: _selectedType == _TxType.expense
                       ? Colors.red.withValues(alpha: 0.1)
-                      : _primaryGreen.withValues(alpha: 0.1),
-                  selectedForegroundColor:
-                      _isExpense ? Colors.red : _primaryGreen,
+                      : _selectedType == _TxType.income
+                          ? _primaryGreen.withValues(alpha: 0.1)
+                          : const Color(0xFFC0FF00).withValues(alpha: 0.1),
+                  selectedForegroundColor: _selectedType == _TxType.expense
+                      ? Colors.red
+                      : _selectedType == _TxType.income
+                          ? _primaryGreen
+                          : const Color(0xFFC0FF00),
                 ),
               ),
               const SizedBox(height: 16),
@@ -342,14 +417,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     return;
                   }
 
-                  final amountCents =
-                      _isExpense ? -(pesos * 100) : (pesos * 100);
+                  final amountCents = _selectedType == _TxType.expense
+                      ? -(pesos * 100)
+                      : (pesos * 100);
 
                   final simNotifier = ref.read(simulationProvider.notifier);
                   final txNotifier = ref.read(transactionListProvider.notifier);
 
-                  if (_isExpense) {
+                  if (_selectedType == _TxType.expense) {
                     await simNotifier.logExpense(pesos.toDouble());
+                  } else if (_selectedType == _TxType.save) {
+                    await simNotifier.logSaving(pesos.toDouble());
                   } else {
                     final curr = ref.read(simulationProvider);
                     await simNotifier.updateState(curr.copyWith(
@@ -367,8 +445,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         : _noteCtrl.text.trim(),
                   );
 
-                  // If it's income, let's treat it as progress towards our goal
-                  if (!_isExpense) {
+                  // If it's income or savings, let's treat it as progress towards our goal
+                  if (_selectedType != _TxType.expense) {
                     final client = Supabase.instance.client;
                     final user = client.auth.currentUser;
                     if (user != null) {
@@ -400,7 +478,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   _amountCtrl.clear();
                   _noteCtrl.clear();
 
-                  if (mounted) {
+                  if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Transaction saved!')),
                     );
@@ -513,9 +591,18 @@ class _TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = item.amountCents > 0;
-    final amountColor = isIncome ? _primaryGreen : Colors.red.shade600;
-    final icon =
-        isIncome ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
+    final isSavings = item.category.toLowerCase() == 'savings';
+    final amountColor = isSavings
+        ? const Color(0xFFC0FF00)
+        : isIncome
+            ? _primaryGreen
+            : Colors.red.shade600;
+
+    final icon = isSavings
+        ? Icons.savings_outlined
+        : isIncome
+            ? Icons.arrow_downward_rounded
+            : Icons.arrow_upward_rounded;
 
     return Card(
       elevation: 0,

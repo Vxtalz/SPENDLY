@@ -40,15 +40,15 @@ class AiChatNotifier extends StateNotifier<List<AiChatMessage>> {
     _isLoading = true;
     state = [...state];
 
-    // Check for API Key first
-    if (Env.groqApiKey == 'PASTE_YOUR_GROQ_KEY_HERE' ||
-        Env.groqApiKey.isEmpty) {
+    // Check for Gemini API Key first
+    if (Env.geminiApiKey == 'PASTE_YOUR_GEMINI_KEY_HERE' ||
+        Env.geminiApiKey.isEmpty) {
       _isLoading = false;
       state = [
         ...state,
         AiChatMessage(
           text:
-              "Medyo may kulang pa tayo. Please go to https://console.groq.com/keys and paste your API key in env.dart!",
+              "Wait lang, bes! Need natin ng API key. Go to https://aistudio.google.com/app/apikey and paste your key in env.dart para makapag-usap tayo!",
           isUser: false,
           timestamp: DateTime.now(),
         )
@@ -59,54 +59,71 @@ class AiChatNotifier extends StateNotifier<List<AiChatMessage>> {
     try {
       final context = await _getFinancialContext();
       final systemPrompt =
-          """You are Spendly's AI Financial Assistant, a friendly and honest financial coach for Filipino youth.
-Your goal is to help users manage their money better using a casual, relatable, and encouraging Taglish (Tagalog-English mix) voice.
-
-RULES:
-1. Speak in natural Taglish (e.g., 'Check natin yung budget mo,' 'Sayang naman yung streak natin.'). 
-2. Use 'bes,' 'ka-Spendly,' or just be very conversational. Avoid sounding like a robot or a bank.
-3. Be honest but practical. If the user is overspending, tell them 'preno-preno rin pag may time' but offer a solution.
-4. Keep responses SHORT and easy to read (use bullet points if needed).
-5. Always use Pesos (₱) for currency.
-6. NO generic advice. Use the context provided below to give specific feedback about their balance or goals.
-
+          """You are Spendly's AI Financial Assistant, a friendly and honest financial coach for Filipino youth. Speak in natural Taglish (Tagalog-English mix) voice. Use 'bes' or 'ka-Spendly'. Be short and use Pesos (₱).
+          
 USER CONTEXT:
 $context""";
 
-      final response = await http.post(
-        Uri.parse('https://api.groq.com/openai/v1/chat/completions'),
-        headers: {
-          'Authorization': 'Bearer ${Env.groqApiKey}',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "model": "llama-3.3-70b-versatile",
-          "messages": [
-            {"role": "system", "content": systemPrompt},
-            {"role": "user", "content": text}
-          ],
-          "temperature": 0.7,
-          "max_tokens": 1024,
-        }),
-      );
+      // Using Gemini 2.5 Flash (The 2026 Standard)
+      final url = Uri.parse(
+          'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${Env.geminiApiKey}');
+
+      Future<http.Response> makeRequest() => http.post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              "contents": [
+                {
+                  "parts": [
+                    {"text": "$systemPrompt\n\nUSER QUESTION: $text"}
+                  ]
+                }
+              ],
+              "generationConfig": {
+                "temperature": 0.7,
+                "maxOutputTokens": 800,
+              }
+            }),
+          );
+
+      var response = await makeRequest();
+
+      // If Rate Limited (429), wait 2 seconds and retry once
+      if (response.statusCode == 429) {
+        await Future.delayed(const Duration(seconds: 2));
+        response = await makeRequest();
+      }
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final aiText = data['choices'][0]['message']['content'];
-
+        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+          final aiText = data['candidates'][0]['content']['parts'][0]['text'];
+          state = [
+            ...state,
+            AiChatMessage(
+                text: aiText, isUser: false, timestamp: DateTime.now())
+          ];
+        } else {
+          throw Exception("No content in response");
+        }
+      } else {
+        // Fallback with specific error code
         state = [
           ...state,
-          AiChatMessage(text: aiText, isUser: false, timestamp: DateTime.now())
+          AiChatMessage(
+            text:
+                "Pasensya na, bes! Medyo busy ang line sa AI side (Err: ${response.statusCode}). Check mo muna yung savings mo, ha? Balikan kita agad!",
+            isUser: false,
+            timestamp: DateTime.now(),
+          )
         ];
-      } else {
-        throw Exception(
-            "Failed to connect to Groq: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
       state = [
         ...state,
         AiChatMessage(
-          text: "Pasensya na, medyo may error sa pagconnect sa AI: $e",
+          text:
+              "Medyo may system issue tayo, bes. Balikan kita maya-maya! 😅 (Error: $e)",
           isUser: false,
           timestamp: DateTime.now(),
         )

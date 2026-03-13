@@ -284,17 +284,18 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
     ];
 
     List<Map<String, dynamic>> targetList = schoolScenarios;
-    if (todayType.toLowerCase() == 'home')
+    if (todayType.toLowerCase() == 'home') {
       targetList = homeScenarios;
-    else if (todayType.toLowerCase() == 'working' ||
+    } else if (todayType.toLowerCase() == 'working' ||
         todayType.toLowerCase() == 'work' ||
-        todayType.toLowerCase() == 'freelancer')
+        todayType.toLowerCase() == 'freelancer') {
       targetList = workScenarios;
-    else if (todayType.toLowerCase() == 'rest' ||
-        todayType.toLowerCase() == 'out of school youth')
+    } else if (todayType.toLowerCase() == 'rest' ||
+        todayType.toLowerCase() == 'out of school youth') {
       targetList = restScenarios;
-    else if (todayType.toLowerCase() == 'emergency')
+    } else if (todayType.toLowerCase() == 'emergency') {
       targetList = emergencyScenarios;
+    }
 
     targetList.shuffle();
     final template = targetList.first;
@@ -446,10 +447,11 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
           .eq('user_id', _userId!)
           .eq('badge_key', key)
           .maybeSingle();
-      if (existing == null)
+      if (existing == null) {
         await client
             .from('badges')
             .insert({'user_id': _userId!, 'badge_key': key, 'label': label});
+      }
     } catch (_) {}
   }
 
@@ -520,8 +522,9 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
     } else if (newState.currentDay % 7 == 1 && newState.currentDay != 1) {
       await _showWeeklyReport();
     }
-    if (newState.streakDays == 30)
+    if (newState.streakDays == 30) {
       await _awardBadge('perfect_streak', 'Perfect Streak');
+    }
   }
 
   Widget _buildGoalSelection(SimulationState simState) {
@@ -795,20 +798,21 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
               onTap: _nextDay,
               child: Container(
                 alignment: Alignment.center,
-                decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A1A),
-                    borderRadius: BorderRadius.circular(20)),
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const Icon(Icons.bolt_rounded, color: Color(0xFFC0FF00)),
-                  const SizedBox(width: 12),
-                  const Text('NEXT DAY',
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 1.1)),
-                ]),
+                decoration: const BoxDecoration(
+                    color: Color(0xFF1A1A1A),
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.bolt_rounded, color: Color(0xFFC0FF00)),
+                      SizedBox(width: 12),
+                      Text('NEXT DAY',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 1.1)),
+                    ]),
               )),
         ),
         const SizedBox(height: 32),

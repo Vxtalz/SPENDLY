@@ -34,7 +34,7 @@ class _GoalSetupPageState extends ConsumerState<GoalSetupPage> {
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             DropdownButtonFormField<GoalPeriod>(
-              value: _period,
+              initialValue: _period,
               decoration: InputDecoration(
                 border:
                     OutlineInputBorder(borderRadius: BorderRadius.circular(16)),

@@ -17,92 +17,106 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
 
   List<ScenarioPack> get _defaults => [
         const ScenarioPack(
-          id: 'debt_borrowing',
-          title: 'Debt and Borrowing',
-          topic: 'Debt and Borrowing',
+          id: 'debt_trap',
+          title: 'The Interest Trap',
+          topic: 'Debt & Interest',
           modules: [
             ScenarioModule(
-                id: 'debt_intro',
-                title: 'Understanding Interest',
-                description: 'Learn interest basics'),
+                id: 'debt_temptation',
+                title: 'The Tempting Upgrade',
+                description:
+                    'A shiny new phone is calling your name. Monthly installment or cold cash?'),
             ScenarioModule(
-                id: 'debt_choices',
-                title: 'Good vs Bad Debt',
-                description: 'Decide when to borrow'),
+                id: 'debt_monster',
+                title: 'The 0% Interest Myth',
+                description:
+                    'Is it really free? Uncover the hidden fees and the growth of the Debt Monster.'),
+            ScenarioModule(
+                id: 'debt_escape',
+                title: 'Escape the Spiral',
+                description:
+                    'The balance is rising! Strategize your payments before the interest traps you.'),
           ],
         ),
         const ScenarioPack(
-          id: 'savings_basics',
-          title: 'Savings Basics',
+          id: 'savings_fort',
+          title: 'The Emergency Fort',
           topic: 'Savings Basics',
           modules: [
             ScenarioModule(
-                id: 'savings_pay_yourself',
-                title: 'Pay Yourself First',
-                description: 'Set aside savings first'),
+                id: 'save_storm',
+                title: 'The Storm is Coming',
+                description:
+                    'A sudden phone repair is approaching. Is your fort strong enough?'),
             ScenarioModule(
-                id: 'savings_emergency',
-                title: 'Emergency Fund',
-                description: 'Build a cushion'),
+                id: 'save_first',
+                title: 'Pay Yourself First',
+                description:
+                    'Intercept your salary before the bills steal it all!'),
           ],
         ),
         const ScenarioPack(
-          id: 'scam_awareness',
-          title: 'Scam Awareness',
+          id: 'scam_wars',
+          title: 'Scambuster: SMS Wars',
           topic: 'Scam Awareness',
           modules: [
             ScenarioModule(
-                id: 'scam_red_flags',
-                title: 'Spotting Red Flags',
-                description: 'Avoid scams'),
+                id: 'scam_phish',
+                title: 'Spot the Phish',
+                description:
+                    'Identify the fake GCash message before it drains your wallet.'),
           ],
         ),
         const ScenarioPack(
-          id: 'insurance_101',
-          title: 'Insurance 101',
+          id: 'insurance_net',
+          title: 'The Safety Net Challenge',
           topic: 'Insurance 101',
           modules: [
             ScenarioModule(
-                id: 'insurance_risk',
-                title: 'Risk Pooling',
-                description: 'How insurance works'),
+                id: 'insurance_tightrope',
+                title: 'The Tightrope Walk',
+                description:
+                    'Life hurdles are falling! Deploy your insurance net to stay safe.'),
           ],
         ),
         const ScenarioPack(
-          id: 'investment_basics',
-          title: 'Investment Basics',
+          id: 'investment_speed',
+          title: 'Investment Speedrun',
           topic: 'Investment Basics',
           modules: [
             ScenarioModule(
-                id: 'invest_risk_return',
-                title: 'Risk vs Return',
-                description: 'Finding balance'),
+                id: 'invest_race',
+                title: 'Risk vs Return Race',
+                description:
+                    'Balance your speed (return) against the obstacles (risk).'),
           ],
         ),
         const ScenarioPack(
-          id: 'first_salary',
-          title: 'Managing Your First Salary',
-          topic: 'Managing Your First Salary',
+          id: 'salary_survival',
+          title: '15-30 Survival Mode',
+          topic: 'Managing First Salary',
           modules: [
             ScenarioModule(
-                id: 'salary_budget',
-                title: 'Your First Budget',
-                description: '50/30/20 rule'),
+                id: 'salary_libre',
+                title: 'The "Libre" Gauntlet',
+                description:
+                    'Survive the pressure of friends asking for treats on payday.'),
           ],
         ),
         const ScenarioPack(
-          id: 'insurance_awareness_20_25',
-          title: 'Insurance Awareness (Ages 20-25)',
+          id: 'insurance_awareness_pro',
+          title: 'Insurance Pro (Ages 20-25)',
           topic: 'Insurance Awareness',
           modules: [
             ScenarioModule(
-                id: 'no_insurance_case',
-                title: 'Without Insurance',
-                description: 'Experience no coverage'),
+                id: 'insurance_horror',
+                title: 'Hospital Horror Story',
+                description: 'Experience an emergency with zero coverage.'),
             ScenarioModule(
-                id: 'with_insurance_case',
-                title: 'With Insurance',
-                description: 'Compare with coverage'),
+                id: 'insurance_peace',
+                title: 'The Peace of Mind',
+                description:
+                    'See the difference when a net is waiting for you.'),
           ],
         ),
       ];
