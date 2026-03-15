@@ -33,6 +33,7 @@ class TransactionNotifier extends StateNotifier<List<TransactionEntry>> {
   Future<void> add({
     required int amountCents,
     required String category,
+    required String type,
     String? note,
     DateTime? timestamp,
     String? receiptId,
@@ -45,6 +46,7 @@ class TransactionNotifier extends StateNotifier<List<TransactionEntry>> {
       timestamp: timestamp ?? DateTime.now(),
       note: note,
       receiptId: receiptId,
+      type: type,
     );
     final next = [...state, entry];
     state = next;

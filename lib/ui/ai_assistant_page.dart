@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/ai_provider.dart';
 
 class AiAssistantPage extends ConsumerStatefulWidget {
@@ -176,7 +177,7 @@ class _ChatInput extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controller,
-                maxLines: null,
+                textInputAction: TextInputAction.send,
                 decoration: InputDecoration(
                   hintText: 'Message Spendly AI...',
                   hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
@@ -221,6 +222,11 @@ class _EmptyChatPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    final fullName = user?.userMetadata?['full_name'] as String?;
+    final userName = (fullName != null && fullName.isNotEmpty) ? fullName.split(' ').first : '';
+    final greeting = userName.isNotEmpty ? 'Hi $userName! Ready to coach you!' : 'Ready to coach you!';
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -236,7 +242,7 @@ class _EmptyChatPlaceholder extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Ready to coach you!',
+            greeting,
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

@@ -13,7 +13,7 @@ final scenarioPacksProvider =
 class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
   ScenarioPacksNotifier() : super(const []);
 
-  static const _prefsKey = 'scenario_packs_v1';
+  static const _prefsKey = 'scenario_packs_v2';
 
   List<ScenarioPack> get _defaults => [
         const ScenarioPack(
@@ -23,19 +23,24 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           modules: [
             ScenarioModule(
                 id: 'debt_temptation',
-                title: 'The Tempting Upgrade',
-                description:
-                    'A shiny new phone is calling your name. Monthly installment or cold cash?'),
+                title: 'Unit 1: The Tempting Upgrade',
+                description: 'A shiny new phone is calling your name. Monthly installment or cold cash?'),
             ScenarioModule(
                 id: 'debt_monster',
-                title: 'The 0% Interest Myth',
-                description:
-                    'Is it really free? Uncover the hidden fees and the growth of the Debt Monster.'),
+                title: 'Unit 2: The 0% Interest Myth',
+                description: 'Is it really free? Uncover the hidden fees.'),
+            ScenarioModule(
+                id: 'debt_payday',
+                title: 'Unit 3: The Payday Pitfall',
+                description: 'Short on cash? The fast cash app wants 10% monthly interest.'),
+            ScenarioModule(
+                id: 'debt_card',
+                title: 'Unit 4: The Credit Card Swiper',
+                description: 'Swipe now, pay later. But the minimum payment is deceptive.'),
             ScenarioModule(
                 id: 'debt_escape',
-                title: 'Escape the Spiral',
-                description:
-                    'The balance is rising! Strategize your payments before the interest traps you.'),
+                title: 'Unit 5: Escape the Spiral',
+                description: 'The balance is rising! Strategize your payments.'),
           ],
         ),
         const ScenarioPack(
@@ -45,14 +50,24 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           modules: [
             ScenarioModule(
                 id: 'save_storm',
-                title: 'The Storm is Coming',
-                description:
-                    'A sudden phone repair is approaching. Is your fort strong enough?'),
+                title: 'Unit 1: The Storm is Coming',
+                description: 'A sudden phone repair is approaching. Is your fort strong enough?'),
             ScenarioModule(
                 id: 'save_first',
-                title: 'Pay Yourself First',
-                description:
-                    'Intercept your salary before the bills steal it all!'),
+                title: 'Unit 2: Pay Yourself First',
+                description: 'Intercept your salary before the bills steal it all!'),
+            ScenarioModule(
+                id: 'save_creep',
+                title: 'Unit 3: Lifestyle Creep',
+                description: 'You got a raise! Do you upgrade your coffee or your fort?'),
+            ScenarioModule(
+                id: 'save_want',
+                title: 'Unit 4: Emergency vs Want',
+                description: 'Sale on sneakers! Is this an emergency?'),
+            ScenarioModule(
+                id: 'save_compound',
+                title: 'Unit 5: The Compound Effect',
+                description: 'Time is money. See how your fort grows when left alone.'),
           ],
         ),
         const ScenarioPack(
@@ -62,9 +77,24 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           modules: [
             ScenarioModule(
                 id: 'scam_phish',
-                title: 'Spot the Phish',
-                description:
-                    'Identify the fake GCash message before it drains your wallet.'),
+                title: 'Unit 1: Spot the Phish',
+                description: 'Identify the fake message before it drains your wallet.'),
+            ScenarioModule(
+                id: 'scam_crypto',
+                title: 'Unit 2: The Crypto Guru',
+                description: 'Guaranteed 200% returns in 3 days? Hmm...'),
+            ScenarioModule(
+                id: 'scam_prize',
+                title: 'Unit 3: You Won a Prize!',
+                description: 'You won a raffle you never entered.'),
+            ScenarioModule(
+                id: 'scam_pyramid',
+                title: 'Unit 4: The "Networking" Pitche',
+                description: 'Your old classmate wants you to sell soap for financial freedom.'),
+            ScenarioModule(
+                id: 'scam_store',
+                title: 'Unit 5: The Fake Store',
+                description: 'Shoes are 90% off on a weird website.'),
           ],
         ),
         const ScenarioPack(
@@ -74,9 +104,24 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           modules: [
             ScenarioModule(
                 id: 'insurance_tightrope',
-                title: 'The Tightrope Walk',
-                description:
-                    'Life hurdles are falling! Deploy your insurance net to stay safe.'),
+                title: 'Unit 1: The Tightrope Walk',
+                description: 'Life hurdles are falling! Deploy your net.'),
+            ScenarioModule(
+                id: 'insurance_peace',
+                title: 'Unit 2: The Peace of Mind',
+                description: 'See the difference when a net is waiting for you.'),
+            ScenarioModule(
+                id: 'insurance_deductible',
+                title: 'Unit 3: Deductible Dilemma',
+                description: 'Low premiums or low deductibles?'),
+            ScenarioModule(
+                id: 'insurance_life',
+                title: 'Unit 4: Life Insurance Basics',
+                description: 'Securing the future of your loved ones.'),
+            ScenarioModule(
+                id: 'insurance_vul',
+                title: 'Unit 5: The Investment-Linked Trap',
+                description: 'Insurance combined with investment. Is it worth it?'),
           ],
         ),
         const ScenarioPack(
@@ -86,9 +131,24 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           modules: [
             ScenarioModule(
                 id: 'invest_race',
-                title: 'Risk vs Return Race',
-                description:
-                    'Balance your speed (return) against the obstacles (risk).'),
+                title: 'Unit 1: Risk vs Return Race',
+                description: 'Balance your speed (return) against the obstacles (risk).'),
+            ScenarioModule(
+                id: 'invest_diversify',
+                title: 'Unit 2: Diversification Dash',
+                description: 'Don\'t put all your eggs in one rocket.'),
+            ScenarioModule(
+                id: 'invest_inflation',
+                title: 'Unit 3: The Inflation Monster',
+                description: 'Your cash is losing power. Invest to beat it.'),
+            ScenarioModule(
+                id: 'invest_dip',
+                title: 'Unit 4: Buying the Dip',
+                description: 'The market crashed! Do you panic sell or buy more?'),
+            ScenarioModule(
+                id: 'invest_time',
+                title: 'Unit 5: Time In The Market',
+                description: 'Timing the market vs Time in the market.'),
           ],
         ),
         const ScenarioPack(
@@ -98,25 +158,24 @@ class ScenarioPacksNotifier extends StateNotifier<List<ScenarioPack>> {
           modules: [
             ScenarioModule(
                 id: 'salary_libre',
-                title: 'The "Libre" Gauntlet',
-                description:
-                    'Survive the pressure of friends asking for treats on payday.'),
-          ],
-        ),
-        const ScenarioPack(
-          id: 'insurance_awareness_pro',
-          title: 'Insurance Pro (Ages 20-25)',
-          topic: 'Insurance Awareness',
-          modules: [
+                title: 'Unit 1: The "Libre" Gauntlet',
+                description: 'Survive the pressure of friends asking for treats on payday.'),
             ScenarioModule(
-                id: 'insurance_horror',
-                title: 'Hospital Horror Story',
-                description: 'Experience an emergency with zero coverage.'),
+                id: 'salary_rule',
+                title: 'Unit 2: The 50-30-20 Rule',
+                description: 'Divide your salary before it vanishes.'),
             ScenarioModule(
-                id: 'insurance_peace',
-                title: 'The Peace of Mind',
-                description:
-                    'See the difference when a net is waiting for you.'),
+                id: 'salary_subs',
+                title: 'Unit 3: The Subscription Drain',
+                description: 'Find and eliminate the vampire apps sucking your wallet.'),
+            ScenarioModule(
+                id: 'salary_hustle',
+                title: 'Unit 4: Side Hustle Energy',
+                description: 'Use your weekends to boost your income.'),
+            ScenarioModule(
+                id: 'salary_tax',
+                title: 'Unit 5: Tax Realities',
+                description: 'Gross vs Net Income shock!'),
           ],
         ),
       ];

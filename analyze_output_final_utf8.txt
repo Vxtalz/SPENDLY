@@ -1,0 +1,10 @@
+﻿Analyzing SPENDLY...                                            
+
+   info - Unnecessary 'const' keyword - lib\ui\badges_page.dart:144:21 - unnecessary_const
+   info - Unnecessary 'const' keyword - lib\ui\badges_page.dart:149:21 - unnecessary_const
+   info - Unnecessary 'const' keyword - lib\ui\badges_page.dart:150:21 - unnecessary_const
+   info - Use 'const' with the constructor to improve performance - lib\ui\scenarios_page.dart:573:31 - prefer_const_constructors
+   info - Statements in an if should be enclosed in a block - lib\ui\simulation_page.dart:451:9 - curly_braces_in_flow_control_structures
+   info - Use 'const' with the constructor to improve performance - lib\ui\simulation_page.dart:804:21 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\ui\simulation_page.dart:804:80 - prefer_const_literals_to_create_immutables
+

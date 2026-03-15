@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/simulation_provider.dart';
+import '../providers/transaction_provider.dart';
 
 class GoalsPage extends ConsumerStatefulWidget {
   const GoalsPage({super.key});
@@ -133,6 +134,7 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
   @override
   Widget build(BuildContext context) {
     final simState = ref.watch(simulationProvider);
+    final txs = ref.watch(transactionListProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (_loading) {
@@ -250,8 +252,12 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
                   final id = goal['id'].toString();
                   final name = goal['name'] as String;
                   final target = (goal['target_amount'] as num).toDouble();
-                  // Sync each card with the total simulation savings
-                  final current = simState.savings;
+                  
+                  final currentCents = txs
+                      .where((t) => t.type == 'save' && t.category.trim() == name.trim())
+                      .fold(0, (sum, t) => sum + t.amountCents);
+                  final current = currentCents / 100.0;
+                  
                   final progress =
                       (target == 0) ? 0.0 : (current / target).clamp(0.0, 1.0);
                   final percent = (progress * 100).round();
@@ -326,7 +332,7 @@ class _GoalsPageState extends ConsumerState<GoalsPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '₱${current.toStringAsFixed(0)} saved',
+                                '₱${current.toStringAsFixed(0)} / ₱${target.toStringAsFixed(0)} saved',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,

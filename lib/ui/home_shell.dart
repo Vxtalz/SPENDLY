@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'badges_page.dart';
 import 'goals_page.dart';
@@ -11,6 +13,7 @@ import 'scenarios_page.dart';
 import 'premium_page.dart';
 import 'settings_page.dart';
 import 'ai_assistant_page.dart';
+import 'profile_page.dart';
 import '../providers/scenario_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/simulation_provider.dart';
@@ -44,6 +47,27 @@ class _HomeShellState extends State<HomeShell> {
           child: Consumer(
             builder: (context, ref, _) {
               final simState = ref.watch(simulationProvider);
+              final user = Supabase.instance.client.auth.currentUser;
+              final avatarUrl = user?.userMetadata?['avatar_url'] as String?;
+
+              Widget avatarWidget;
+              if (avatarUrl != null && avatarUrl.isNotEmpty) {
+                if (avatarUrl.startsWith('data:image') || avatarUrl.length > 2000) {
+                  avatarWidget = Image.memory(
+                    base64Decode(avatarUrl.contains(',') ? avatarUrl.split(',').last : avatarUrl),
+                    fit: BoxFit.cover,
+                  );
+                } else {
+                  avatarWidget = Image.network(
+                    avatarUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 20),
+                  );
+                }
+              } else {
+                avatarWidget = Icon(Icons.person, size: 20, color: Theme.of(context).colorScheme.primary);
+              }
+
               return Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -58,16 +82,25 @@ class _HomeShellState extends State<HomeShell> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                        width: 32,
-                        height: 24,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
-                            image: const DecorationImage(
-                                image: NetworkImage(
-                                    'https://flagcdn.com/w40/ph.png'),
-                                fit: BoxFit.cover))),
+                    GestureDetector(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ProfilePage()),
+                        );
+                        // Trigger a rebuild when coming back so the new profile pic is loaded
+                        setState(() {});
+                      },
+                      child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                              border: Border.all(color: const Color(0xFFE2E8F0))),
+                          clipBehavior: Clip.antiAlias,
+                          child: avatarWidget),
+                    ),
                     const Spacer(),
                     _topStat(
                         icon: Icons.local_fire_department_rounded,
@@ -118,7 +151,7 @@ class _HomeShellState extends State<HomeShell> {
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.onSurface))),
               _drawerTile('Profile', Icons.person_outline,
-                  () => Navigator.pop(context)),
+                  () => _openThenClose(context, const ProfilePage())),
               _drawerTile('History', Icons.bar_chart,
                   () => _openThenClose(context, const HistoryPage())),
               _drawerTile('Premium', Icons.workspace_premium_outlined,

@@ -364,6 +364,7 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
         amountCents: amountCents,
         category: 'Savings',
         note: 'Saved from $label',
+        type: 'save',
       );
     } else {
       await notifier.logExpense(amount);
@@ -372,6 +373,7 @@ class _SimulationPageState extends ConsumerState<SimulationPage> {
         amountCents: -amountCents,
         category: 'Expense',
         note: 'Spent on $label',
+        type: 'expense',
       );
     }
 

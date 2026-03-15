@@ -23,8 +23,36 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   final _categoryCtrl = TextEditingController(text: 'Income');
   final _noteCtrl = TextEditingController();
   _TxType _selectedType = _TxType.income;
+  List<Map<String, dynamic>> _userGoals = [];
+  DateTime? _filterDate;
 
   static const _primaryGreen = Color(0xFF22C55E);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserGoals();
+  }
+
+  Future<void> _loadUserGoals() async {
+    try {
+      final client = Supabase.instance.client;
+      final userId = client.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final data = await client
+          .from('goals')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: true);
+
+      if (mounted) {
+        setState(() {
+          _userGoals = List<Map<String, dynamic>>.from(data);
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -52,7 +80,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     for (final t in txs) {
       if (!t.timestamp.isBefore(startOfDay) && t.timestamp.isBefore(endOfDay)) {
         if (t.amountCents > 0) {
-          if (t.category.toLowerCase() == 'savings') {
+          if (t.type == 'save') {
             totalSaved += t.amountCents;
           } else {
             totalIncomeActual += t.amountCents;
@@ -277,27 +305,81 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
         ),
         Divider(height: 1, color: dividerColor),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _filterDate == null
+                    ? 'Records'
+                    : 'Filtered: ${DateFormat('MMM d, yyyy').format(_filterDate!)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: onSurface.withValues(alpha: 0.8),
+                ),
+              ),
+              Row(
+                children: [
+                  if (_filterDate != null)
+                    IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.grey, size: 20),
+                      onPressed: () => setState(() => _filterDate = null),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.calendar_month, color: _primaryGreen, size: 20),
+                    onPressed: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        initialDate: _filterDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
+                      if (date != null) {
+                        setState(() => _filterDate = date);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
         Expanded(
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             children: [
-              _buildDateSection(
-                context,
-                startOfDay,
-                (byDate[startOfDay] ?? [])
-                    .map(
-                      (t) => _TransactionItem(
-                        id: t.id,
-                        category: t.category,
-                        note: t.note,
-                        amountCents: t.amountCents,
-                        timestamp: t.timestamp,
-                        isSample: false,
-                      ),
-                    )
-                    .toList(),
-              ),
-              ...sortedDates.where((d) => d != startOfDay).map(
+              if (_filterDate == null ||
+                  (startOfDay.year == _filterDate!.year &&
+                      startOfDay.month == _filterDate!.month &&
+                      startOfDay.day == _filterDate!.day))
+                _buildDateSection(
+                  context,
+                  startOfDay,
+                  (byDate[startOfDay] ?? [])
+                      .map(
+                        (t) => _TransactionItem(
+                          id: t.id,
+                          category: t.category,
+                          note: t.note,
+                          amountCents: t.amountCents,
+                          timestamp: t.timestamp,
+                          type: t.type,
+                          isSample: false,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ...sortedDates.where((d) {
+                if (_filterDate != null) {
+                  return d.year == _filterDate!.year &&
+                      d.month == _filterDate!.month &&
+                      d.day == _filterDate!.day &&
+                      d != startOfDay;
+                }
+                return d != startOfDay;
+              }).map(
                     (d) => _buildDateSection(
                       context,
                       d,
@@ -309,6 +391,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               note: t.note,
                               amountCents: t.amountCents,
                               timestamp: t.timestamp,
+                              type: t.type,
                               isSample: false,
                             ),
                           )
@@ -352,14 +435,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 onSelectionChanged: (val) {
                   setState(() {
                     _selectedType = val.first;
-                    if (_selectedType == _TxType.expense &&
-                        _categoryCtrl.text == 'Income') {
-                      _categoryCtrl.text = 'Food';
-                    } else if (_selectedType == _TxType.income &&
-                        _categoryCtrl.text == 'Food') {
+                    if (_selectedType == _TxType.expense) {
+                      _categoryCtrl.text = 'Expense';
+                    } else if (_selectedType == _TxType.income) {
                       _categoryCtrl.text = 'Income';
                     } else if (_selectedType == _TxType.save) {
-                      _categoryCtrl.text = 'Savings';
+                      _categoryCtrl.text = 'Saving';
                     }
                   });
                 },
@@ -392,8 +473,28 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   Expanded(
                     child: TextField(
                       controller: _categoryCtrl,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Category',
+                        suffixIcon: (_selectedType == _TxType.save && _userGoals.isNotEmpty)
+                            ? PopupMenuButton<String>(
+                                icon: const Icon(Icons.arrow_drop_down),
+                                onSelected: (value) {
+                                  _categoryCtrl.text = value;
+                                },
+                                itemBuilder: (context) {
+                                  return [
+                                    const PopupMenuItem(
+                                      value: 'General Saving',
+                                      child: Text('General Saving'),
+                                    ),
+                                    ..._userGoals.map((g) => PopupMenuItem(
+                                          value: g['name'] as String,
+                                          child: Text(g['name'] as String),
+                                        ))
+                                  ];
+                                },
+                              )
+                            : null,
                       ),
                     ),
                   ),
@@ -443,6 +544,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     note: _noteCtrl.text.trim().isEmpty
                         ? null
                         : _noteCtrl.text.trim(),
+                    type: _selectedType.name,
                   );
 
                   // If it's income or savings, let's treat it as progress towards our goal
@@ -518,6 +620,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     DateTime date,
     List<_TransactionItem> items,
   ) {
+    if (items.isEmpty) return const SizedBox.shrink();
+
     final now = DateTime.now();
     final todayDate = DateTime(now.year, now.month, now.day);
     final isToday = date == todayDate;
@@ -568,6 +672,7 @@ class _TransactionItem {
   final String? note;
   final int amountCents;
   final DateTime? timestamp;
+  final String type;
   final bool isSample;
 
   const _TransactionItem({
@@ -576,6 +681,7 @@ class _TransactionItem {
     this.note,
     required this.amountCents,
     this.timestamp,
+    required this.type,
     this.isSample = false,
   });
 }
@@ -591,7 +697,7 @@ class _TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIncome = item.amountCents > 0;
-    final isSavings = item.category.toLowerCase() == 'savings';
+    final isSavings = item.type == 'save';
     final amountColor = isSavings
         ? const Color(0xFFC0FF00)
         : isIncome
@@ -624,22 +730,38 @@ class _TransactionTile extends StatelessWidget {
           child: Icon(icon, color: amountColor, size: 22),
         ),
         title: Text(
-          item.note?.isNotEmpty == true ? item.note! : item.category,
+          item.category,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 15,
           ),
         ),
-        subtitle: Text(
-          item.timestamp != null
-              ? DateFormat('h:mm a').format(item.timestamp!)
-              : '—',
-          style: TextStyle(
-            fontSize: 12,
-            color:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-          ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (item.note?.isNotEmpty == true) ...[
+              Text(
+                item.note!,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+              const SizedBox(height: 2),
+            ],
+            Text(
+              item.timestamp != null
+                  ? DateFormat('h:mm a').format(item.timestamp!)
+                  : '—',
+              style: TextStyle(
+                fontSize: 12,
+                color:
+                    Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ],
         ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

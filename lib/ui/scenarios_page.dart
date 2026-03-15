@@ -105,97 +105,104 @@ class ScenariosPage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ...p.modules.map((m) {
+                ...p.modules.asMap().entries.map((entry) {
+                  final idx = entry.key;
+                  final m = entry.value;
+                  final isLocked = idx > 0 && !p.modules[idx - 1].completed;
+
                   return Padding(
                     padding: const EdgeInsets.only(left: 12, bottom: 8),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                              color: Theme.of(context)
-                                  .dividerColor
-                                  .withValues(alpha: 0.1),
-                              width: 2)),
-                      child: Row(
-                        children: [
-                          Icon(
-                              m.completed
-                                  ? Icons.check_circle
-                                  : Icons.circle_outlined,
-                              color: m.completed
-                                  ? const Color(0xFF58CC02)
-                                  : const Color(0xFFE5E5E5)),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(m.title,
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: m.completed
-                                            ? const Color(0xFF94A3B8)
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .onSurface,
-                                        decoration: m.completed
-                                            ? TextDecoration.lineThrough
-                                            : null)),
-                                if (!m.completed)
-                                  Text(m.description,
+                    child: Opacity(
+                      opacity: isLocked ? 0.6 : 1.0,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                                color: Theme.of(context)
+                                    .dividerColor
+                                    .withValues(alpha: 0.1),
+                                width: 2)),
+                        child: Row(
+                          children: [
+                            Icon(
+                                isLocked ? Icons.lock : (m.completed ? Icons.check_circle : Icons.circle_outlined),
+                                color: isLocked 
+                                  ? Colors.grey
+                                  : m.completed
+                                    ? const Color(0xFF58CC02)
+                                    : const Color(0xFFE5E5E5)),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(m.title,
                                       style: TextStyle(
-                                          fontSize: 12,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurface
-                                              .withValues(alpha: 0.6))),
-                              ],
-                            ),
-                          ),
-                          if (!m.completed)
-                            InteractiveButton(
-                              isPrimary: true,
-                              onTap: () async {
-                                final gamifiedPrefixes = [
-                                  'debt_',
-                                  'save_',
-                                  'scam_',
-                                  'insurance_',
-                                  'invest_',
-                                  'salary_'
-                                ];
-                                bool isGamified = gamifiedPrefixes
-                                    .any((pre) => m.id.startsWith(pre));
-
-                                if (isGamified) {
-                                  _showInteractiveScenario(context, ref, m);
-                                } else {
-                                  final messenger =
-                                      ScaffoldMessenger.of(context);
-                                  await ref
-                                      .read(scenarioPacksProvider.notifier)
-                                      .markModuleCompleted(m.id);
-                                  messenger.showSnackBar(SnackBar(
-                                      content: Text('Completed: ${m.title}')));
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                    color: const Color(0xFF1A1A1A),
-                                    borderRadius: BorderRadius.circular(12)),
-                                child: const Text('START',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold)),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: m.completed
+                                              ? const Color(0xFF94A3B8)
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface,
+                                          decoration: m.completed
+                                              ? TextDecoration.lineThrough
+                                              : null)),
+                                  if (!m.completed && !isLocked)
+                                    Text(m.description,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(alpha: 0.6))),
+                                ],
                               ),
                             ),
-                        ],
+                            if (!m.completed && !isLocked)
+                              InteractiveButton(
+                                isPrimary: true,
+                                onTap: () async {
+                                  final gamifiedPrefixes = [
+                                    'debt_',
+                                    'save_',
+                                    'scam_',
+                                    'insurance_',
+                                    'invest_',
+                                    'salary_'
+                                  ];
+                                  bool isGamified = gamifiedPrefixes
+                                      .any((pre) => m.id.startsWith(pre));
+
+                                  if (isGamified) {
+                                    _showInteractiveScenario(context, ref, m);
+                                  } else {
+                                    final messenger =
+                                        ScaffoldMessenger.of(context);
+                                    await ref
+                                        .read(scenarioPacksProvider.notifier)
+                                        .markModuleCompleted(m.id);
+                                    messenger.showSnackBar(SnackBar(
+                                        content: Text('Completed: ${m.title}')));
+                                  }
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  decoration: BoxDecoration(
+                                      color: const Color(0xFF1A1A1A),
+                                      borderRadius: BorderRadius.circular(12)),
+                                  child: const Text('START',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -328,6 +335,14 @@ class ScenariosPage extends ConsumerWidget {
       result2 =
           "It was awkward for 5 seconds, but your budget survived. You offer to host a 'Home Movie Night' instead. Survival: HERO!";
       emoji = "🍖";
+    }
+
+    if (story.isEmpty) {
+      story = "You encountered a difficult financial situation: ${m.title}";
+      choice1 = "The Reckless Choice";
+      result1 = "Oh no! Your finances took a massive hit.";
+      choice2 = "The Smart Choice";
+      result2 = "Great decision! You handled the situation perfectly.";
     }
 
     showGeneralDialog(

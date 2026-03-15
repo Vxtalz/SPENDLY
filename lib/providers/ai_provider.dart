@@ -1,6 +1,5 @@
-import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
+import 'package:google_generative_ai/google_generative_ai.dart';
 import '../env.dart';
 import 'goal_provider.dart';
 import 'transaction_provider.dart';
@@ -40,6 +39,11 @@ class AiChatNotifier extends StateNotifier<List<AiChatMessage>> {
     _isLoading = true;
     state = [...state];
 
+    // Get user details
+    final user = Supabase.instance.client.auth.currentUser;
+    final fullName = user?.userMetadata?['full_name'] as String?;
+    final userName = (fullName != null && fullName.isNotEmpty) ? fullName.split(' ').first : 'ka-Spendly';
+
     // Check for Gemini API Key first
     if (Env.geminiApiKey == 'PASTE_YOUR_GEMINI_KEY_HERE' ||
         Env.geminiApiKey.isEmpty) {
@@ -48,7 +52,7 @@ class AiChatNotifier extends StateNotifier<List<AiChatMessage>> {
         ...state,
         AiChatMessage(
           text:
-              "Wait lang, bes! Need natin ng API key. Go to https://aistudio.google.com/app/apikey and paste your key in env.dart para makapag-usap tayo!",
+              "Wait lang, $userName! Need natin ng API key. Go to https://aistudio.google.com/app/apikey and paste your key in env.dart para makapag-usap tayo!",
           isUser: false,
           timestamp: DateTime.now(),
         )
@@ -58,61 +62,102 @@ class AiChatNotifier extends StateNotifier<List<AiChatMessage>> {
 
     try {
       final context = await _getFinancialContext();
+      
+      final chatContext = state
+          .where((m) => !m.text.startsWith('Wait lang') && !m.text.startsWith('Pasensya na') && !m.text.startsWith('Medyo may system'))
+          .map((m) => "${m.isUser ? 'User' : 'AI'}: ${m.text}")
+          .join('\n');
+
       final systemPrompt =
-          """You are Spendly's AI Financial Assistant, a friendly and honest financial coach for Filipino youth. Speak in natural Taglish (Tagalog-English mix) voice. Use 'bes' or 'ka-Spendly'. Be short and use Pesos (₱).
-          
-USER CONTEXT:
-$context""";
+          """You are Spendly's AI Financial Assistant, a friendly and honest financial coach for Filipino youth. Speak in natural Taglish (Tagalog-English mix) voice. Always address the user by their name '$userName' (e.g., "Hi $userName, how can I help you?") instead of 'bes' or 'ka-Spendly'. Be short, friendly, and use Pesos (₱).""";
 
-      // Using Gemini 2.5 Flash (The 2026 Standard)
-      final url = Uri.parse(
-          'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${Env.geminiApiKey}');
+      try {
+        final recordTransactionTool = Tool(functionDeclarations: [
+          FunctionDeclaration(
+            'record_transaction',
+            'Record a financial transaction when the user explicitly says they spent, bought, saved, or received money.',
+            Schema(
+              SchemaType.object,
+              properties: {
+                'type': Schema(SchemaType.string, description: 'Must be "income", "expense", or "save"'),
+                'amount': Schema(SchemaType.number, description: 'The absolute amount in Pesos. DO NOT miss zeros! (e.g. if user says 50k, log 50000. "1k" = 1000)'),
+                'category': Schema(SchemaType.string, description: 'Category name (e.g. "Pizza", "Salary")'),
+              },
+              requiredProperties: ['type', 'amount', 'category'],
+            ),
+          )
+        ]);
 
-      Future<http.Response> makeRequest() => http.post(
-            url,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              "contents": [
-                {
-                  "parts": [
-                    {"text": "$systemPrompt\n\nUSER QUESTION: $text"}
-                  ]
-                }
-              ],
-              "generationConfig": {
-                "temperature": 0.7,
-                "maxOutputTokens": 800,
+        final model = GenerativeModel(
+          model: 'gemini-2.5-flash',
+          apiKey: Env.geminiApiKey,
+          tools: [recordTransactionTool],
+          generationConfig: GenerationConfig(
+            temperature: 0.7,
+            maxOutputTokens: 800,
+          ),
+          systemInstruction: Content.system("$systemPrompt\n\nUSER CONTEXT:\n$context\n\nCONVERSATION HISTORY:\n$chatContext"),
+        );
+
+        final contents = [Content.text(text)];
+        var response = await model.generateContent(contents);
+
+        if (response.functionCalls.isNotEmpty) {
+          final call = response.functionCalls.first;
+          if (call.name == 'record_transaction') {
+            final args = call.args;
+            final String type = args['type'] as String? ?? 'expense';
+            final double amount = (args['amount'] as num?)?.toDouble() ?? 0.0;
+            final String category = args['category'] as String? ?? 'AI Recorded';
+
+            if (amount > 0) {
+              final txNotifier = _ref.read(transactionListProvider.notifier);
+              final simNotifier = _ref.read(simulationProvider.notifier);
+
+              final pesos = amount.toInt();
+              final amountCents = type == 'expense' ? -(pesos * 100) : (pesos * 100);
+
+              if (type == 'expense') {
+                await simNotifier.logExpense(pesos.toDouble());
+              } else if (type == 'save') {
+                await simNotifier.logSaving(pesos.toDouble());
+              } else {
+                final curr = _ref.read(simulationProvider);
+                await simNotifier.updateState(curr.copyWith(balance: curr.balance + pesos));
               }
-            }),
-          );
 
-      var response = await makeRequest();
+              await txNotifier.add(
+                amountCents: amountCents,
+                category: category,
+                type: type,
+              );
 
-      // If Rate Limited (429), wait 2 seconds and retry once
-      if (response.statusCode == 429) {
-        await Future.delayed(const Duration(seconds: 2));
-        response = await makeRequest();
-      }
+              contents.add(response.candidates.first.content);
+              contents.add(Content.functionResponse('record_transaction', {
+                'status': 'success',
+                'details': 'Recorded $type of $pesos for $category'
+              }));
+              
+              response = await model.generateContent(contents);
+            }
+          }
+        }
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
-          final aiText = data['candidates'][0]['content']['parts'][0]['text'];
+        if (response.text != null && response.text!.isNotEmpty) {
           state = [
             ...state,
             AiChatMessage(
-                text: aiText, isUser: false, timestamp: DateTime.now())
+                text: response.text!, isUser: false, timestamp: DateTime.now())
           ];
         } else {
           throw Exception("No content in response");
         }
-      } else {
-        // Fallback with specific error code
+      } on GenerativeAIException catch (e) {
         state = [
           ...state,
           AiChatMessage(
             text:
-                "Pasensya na, bes! Medyo busy ang line sa AI side (Err: ${response.statusCode}). Check mo muna yung savings mo, ha? Balikan kita agad!",
+                "Pasensya na, $userName! May inayos lang akong konti (Err: API Issue). Double check mo yung API key mo baka nagkalat lang, ha? Balikan kita agad! Detalles: $e",
             isUser: false,
             timestamp: DateTime.now(),
           )
@@ -123,7 +168,7 @@ $context""";
         ...state,
         AiChatMessage(
           text:
-              "Medyo may system issue tayo, bes. Balikan kita maya-maya! 😅 (Error: $e)",
+              "Medyo may system issue tayo, $userName. Balikan kita maya-maya! 😅 (Error: $e)",
           isUser: false,
           timestamp: DateTime.now(),
         )

@@ -167,12 +167,14 @@ class TransactionEntry {
   final DateTime timestamp;
   final String? note;
   final String? receiptId; // link to ReceiptEntry
+  final String type; // 'income', 'expense', or 'save'
 
   const TransactionEntry({
     required this.id,
     required this.amountCents,
     required this.category,
     required this.timestamp,
+    required this.type,
     this.note,
     this.receiptId,
   });
@@ -184,6 +186,7 @@ class TransactionEntry {
     DateTime? timestamp,
     String? note,
     String? receiptId,
+    String? type,
   }) {
     return TransactionEntry(
       id: id ?? this.id,
@@ -192,6 +195,7 @@ class TransactionEntry {
       timestamp: timestamp ?? this.timestamp,
       note: note ?? this.note,
       receiptId: receiptId ?? this.receiptId,
+      type: type ?? this.type,
     );
   }
 
@@ -202,17 +206,34 @@ class TransactionEntry {
         'timestamp': timestamp.toIso8601String(),
         'note': note,
         'receiptId': receiptId,
+        'type': type,
       };
 
-  factory TransactionEntry.fromJson(Map<String, dynamic> json) =>
-      TransactionEntry(
-        id: json['id'] as String,
-        amountCents: json['amountCents'] as int,
-        category: json['category'] as String,
-        timestamp: DateTime.parse(json['timestamp'] as String),
-        note: json['note'] as String?,
-        receiptId: json['receiptId'] as String?,
-      );
+  factory TransactionEntry.fromJson(Map<String, dynamic> json) {
+    String inferredType;
+    if (json.containsKey('type')) {
+      inferredType = json['type'] as String;
+    } else {
+      final amt = json['amountCents'] as int;
+      if (amt < 0) {
+        inferredType = 'expense';
+      } else if ((json['category'] as String).toLowerCase().contains('sav')) {
+        inferredType = 'save';
+      } else {
+        inferredType = 'income';
+      }
+    }
+
+    return TransactionEntry(
+      id: json['id'] as String,
+      amountCents: json['amountCents'] as int,
+      category: json['category'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      note: json['note'] as String?,
+      receiptId: json['receiptId'] as String?,
+      type: inferredType,
+    );
+  }
 }
 
 /// Resibo — Receipt Logger
